@@ -3,7 +3,7 @@ module weylus-surface
 go 1.20
 
 require (
-	github.com/diamondburned/gotk4/pkg v0.0.4
+	github.com/diamondburned/gotk4/pkg v0.0.5
 	github.com/kr/pretty v0.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.29.0
@@ -29,7 +29,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
-	go4.org/unsafe/assume-no-moving-gc v0.0.0-20220617031537-928513b29760 // indirect
+	go4.org/unsafe/assume-no-moving-gc v0.0.0-20230221090011-e4bae7ad2296 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
