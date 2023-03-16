@@ -1,0 +1,42 @@
+run:
+  skip-files:
+    - ".*_enum\\.go$"
+  modules-download-mode: readonly
+  allow-parallel-runners: true
+  go: '1.20'
+output:
+  format: colored-line-number
+linters:
+  enable:
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - bodyclose
+    - dupl
+    - errorlint
+    - exportloopref
+    - funlen
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - goprintffuncname
+    - gosec
+    - prealloc
+    - revive
+    - stylecheck
+    - whitespace
+linters-settings:
+  govet:
+    settings:
+      printf:
+        funcs:
+          - (*github.com/rs/zerolog.Event).Msgf
+          - github.com/pkg/errors.Errorf
+          - github.com/pkg/errors.Wrapf
+          - github.com/pkg/errors.WithMessagef
+    enable:
+      - structtag
+      - unmarshal
+      - ifaceassert

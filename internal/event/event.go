@@ -100,7 +100,7 @@ func (m *ControllerManager) KeyDownHandler(keyval, keycode uint, state gdk.Modif
 	var ok2 bool
 	m.KeyState.Key, ok2 = protocol.KeyValue[keyval]
 	if !ok2 {
-		m.KeyState.Key = string(gdk.KeyvalToUnicode(keyval))
+		m.KeyState.Key = string(rune(gdk.KeyvalToUnicode(keyval)))
 	}
 	m.KeyState.EventType = protocol.KeyboardEventTypeDown
 
@@ -118,7 +118,7 @@ func (m *ControllerManager) KeyReleasedHandler(keyval, keycode uint, state gdk.M
 	var ok bool
 	m.KeyState.Key, ok = protocol.KeyValue[keyval]
 	if !ok {
-		m.KeyState.Key = string(gdk.KeyvalToUnicode(keyval))
+		m.KeyState.Key = string(rune(gdk.KeyvalToUnicode(keyval)))
 	}
 	m.KeyState.EventType = protocol.KeyboardEventTypeUp
 }
@@ -136,7 +136,6 @@ func (m *ControllerManager) ConnectControllers(overlay *gtk.Overlay) {
 	overlay.AddController(m.Click)
 	overlay.AddController(m.Stylus)
 	overlay.AddController(m.Motion)
-	//overlay.AddController(m.Scroll)
 }
 
 func (m *ControllerManager) stylusEventHandler(x, y float64) {
@@ -148,7 +147,6 @@ func (m *ControllerManager) stylusEventHandler(x, y float64) {
 	m.StylusState.TiltY = int32(90 * yTilt)
 	m.StylusState.Pressure, _ = m.Stylus.Axis(gdk.AxisPressure)
 	m.StylusState.Timestamp = uint64(time.Now().UnixMilli())
-
 }
 
 func (m *ControllerManager) StylusUpEventHandler(x, y float64) {
@@ -201,33 +199,29 @@ func (m *ControllerManager) PressedHandler(press int, x, y float64) {
 	switch button {
 	case gdk.BUTTON_PRIMARY:
 		btn = protocol.ButtonPrimary
-		break
 	case gdk.BUTTON_MIDDLE:
 		btn = protocol.ButtonAuxiliary
-		break
 	case gdk.BUTTON_SECONDARY:
 		btn = protocol.ButtonSecondary
-		break
 	case 8:
 		btn = protocol.ButtonFourth
-		break
 	case 9:
 		btn = protocol.ButtonFifth
-		break
 	}
-	if strings.Contains(name, "Stylus") {
+	switch {
+	case strings.Contains(name, "Stylus"):
 		m.StylusState.Timestamp = uint64(time.Now().UnixMilli())
 		m.StylusState.X = x
 		m.StylusState.Y = y
 		m.StylusState.Button = btn
 		m.StylusState.Buttons |= btn
-	} else if source == gdk.SourceTouchscreen {
+	case source == gdk.SourceTouchscreen:
 		m.TouchState.Timestamp = uint64(time.Now().UnixMilli())
 		m.TouchState.X = x
 		m.TouchState.Y = y
 		m.TouchState.Button = btn
 		m.TouchState.Buttons |= btn
-	} else {
+	default:
 		m.MouseState.Timestamp = uint64(time.Now().UnixMilli())
 		m.MouseState.X = x
 		m.MouseState.Y = y
@@ -245,33 +239,29 @@ func (m *ControllerManager) ReleasedHandler(press int, x, y float64) {
 	switch button {
 	case gdk.BUTTON_PRIMARY:
 		btn = protocol.ButtonPrimary
-		break
 	case gdk.BUTTON_MIDDLE:
 		btn = protocol.ButtonAuxiliary
-		break
 	case gdk.BUTTON_SECONDARY:
 		btn = protocol.ButtonSecondary
-		break
 	case 8:
 		btn = protocol.ButtonFourth
-		break
 	case 9:
 		btn = protocol.ButtonFifth
-		break
 	}
-	if strings.Contains(name, "Stylus") {
+	switch {
+	case strings.Contains(name, "Stylus"):
 		m.StylusState.Timestamp = uint64(time.Now().UnixMilli())
 		m.StylusState.X = x
 		m.StylusState.Y = y
 		m.StylusState.Button = protocol.ButtonNone
 		m.StylusState.Buttons &= ^btn
-	} else if source == gdk.SourceTouchscreen {
+	case source == gdk.SourceTouchscreen:
 		m.TouchState.Timestamp = uint64(time.Now().UnixMilli())
 		m.TouchState.X = x
 		m.TouchState.Y = y
 		m.TouchState.Button = protocol.ButtonNone
 		m.TouchState.Buttons &= ^btn
-	} else {
+	default:
 		m.MouseState.Timestamp = uint64(time.Now().UnixMilli())
 		m.MouseState.X = x
 		m.MouseState.Y = y
@@ -292,22 +282,23 @@ func (m *ControllerManager) MotionHandler(x, y float64) {
 		}
 	}
 
-	if strings.Contains(name, "Stylus") {
-		//m.StylusState.Timestamp = uint64(time.Now().UnixMilli())
-		//m.StylusState.X = x
-		//m.StylusState.Y = y
-	} else if source == gdk.SourceTouchscreen {
-		//m.TouchState.Timestamp = uint64(time.Now().UnixMilli())
-		//m.TouchState.X = x
-		//m.TouchState.Y = y
-	} else {
+	switch {
+	case strings.Contains(name, "Stylus"):
+		m.StylusState.Timestamp = uint64(time.Now().UnixMilli())
+		m.StylusState.X = x
+		m.StylusState.Y = y
+	case source == gdk.SourceTouchscreen:
+		m.TouchState.Timestamp = uint64(time.Now().UnixMilli())
+		m.TouchState.X = x
+		m.TouchState.Y = y
+	default:
 		m.MouseState.Timestamp = uint64(time.Now().UnixMilli())
 		m.MouseState.X = x
 		m.MouseState.Y = y
 	}
 }
 
-func (m *ControllerManager) UnpairedReleaseHandler(x float64, y float64, button uint, sequence *gdk.EventSequence) {
+func (m *ControllerManager) UnpairedReleaseHandler(x float64, y float64, button uint, _ *gdk.EventSequence) {
 	defer m.runCallbacks()
 	var name string
 	var source gdk.InputSource
@@ -323,32 +314,34 @@ func (m *ControllerManager) UnpairedReleaseHandler(x float64, y float64, button 
 	switch button {
 	case gdk.BUTTON_PRIMARY:
 		btn = protocol.ButtonPrimary
-		break
 	case gdk.BUTTON_MIDDLE:
 		btn = protocol.ButtonAuxiliary
-		break
 	case gdk.BUTTON_SECONDARY:
 		btn = protocol.ButtonSecondary
-		break
 	case 8:
 		btn = protocol.ButtonFourth
-		break
 	case 9:
 		btn = protocol.ButtonFifth
-		break
 	}
-	if strings.Contains(name, "Stylus") {
+	switch {
+	case strings.Contains(name, "Stylus"):
 		m.StylusState.Timestamp = uint64(time.Now().UnixMilli())
 		m.StylusState.Button = protocol.ButtonNone
 		m.StylusState.Buttons &= ^btn
-	} else if source == 3 {
+		m.StylusState.X = x
+		m.StylusState.Y = y
+	case source == 3:
 		m.TouchState.Timestamp = uint64(time.Now().UnixMilli())
 		m.TouchState.Button = protocol.ButtonNone
 		m.TouchState.Buttons &= ^btn
-	} else {
+		m.TouchState.X = x
+		m.TouchState.Y = y
+	default:
 		m.MouseState.Timestamp = uint64(time.Now().UnixMilli())
 		m.MouseState.Button = protocol.ButtonNone
 		m.MouseState.Buttons &= ^btn
+		m.MouseState.X = x
+		m.MouseState.Y = y
 	}
 }
 

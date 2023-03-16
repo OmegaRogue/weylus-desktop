@@ -13,12 +13,16 @@ import (
 
 const (
 	// KeyboardLocationStandard is a KeyboardLocation of type Standard.
+	// The key described by the event is not identified as being located in a particular area of the keyboard.
 	KeyboardLocationStandard KeyboardLocation = iota
 	// KeyboardLocationLeft is a KeyboardLocation of type Left.
+	// The key is on the left side of the keyboard.
 	KeyboardLocationLeft
 	// KeyboardLocationRight is a KeyboardLocation of type Right.
+	// The key is located on the right side of the keyboard.
 	KeyboardLocationRight
 	// KeyboardLocationNumpad is a KeyboardLocation of type Numpad.
+	// The key is located on the numeric keypad.
 	KeyboardLocationNumpad
 )
 

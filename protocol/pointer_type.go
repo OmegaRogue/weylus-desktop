@@ -2,6 +2,7 @@
 
 package protocol
 
+// PointerType indicates what type the pointer triggering this event is.
 /*
 ENUM(
 unknown=""

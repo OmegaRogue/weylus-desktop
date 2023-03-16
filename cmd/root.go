@@ -19,16 +19,14 @@ package cmd
 
 import (
 	"context"
-	_ "embed"
-	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/diamondburned/gotk4/pkg/cairo"
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
+	"github.com/kr/pretty"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -53,12 +51,8 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 
-		data, _ := json.Marshal(protocol.WeylusError{ErrorMessage: "test"})
-		log.Info().RawJSON("data", data).Msg("")
 		app := gtk.NewApplication("codes.omegavoid.weylus-client", gio.ApplicationFlagsNone)
 		app.ConnectActivate(func() { activate(app) })
 
@@ -75,7 +69,6 @@ type State struct {
 }
 
 func activate(app *gtk.Application) {
-
 	window := gtk.NewApplicationWindow(app)
 	window.SetTitle("weylus-client")
 	drawArea := gtk.NewDrawingArea()
@@ -126,84 +119,67 @@ func activate(app *gtk.Application) {
 	window.SetChild(overlay)
 	window.SetDefaultSize(400, 300)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
-	go func() {
-
-		c, _, err := websocket.Dial(ctx, "ws://192.168.0.49:9001", nil)
-		if err != nil {
-			log.Err(err).Msg("dial websocket")
-		}
-
-		if err := wsjson.Write(ctx, c, "GetCapturableList"); err != nil {
-			log.Err(err).Msg("send GetCapturableList")
-		}
-		msg, err := readSocket(ctx, c)
-		log.Err(err).RawJSON("msg", []byte(msg)).Msg("read socket")
-
-		config := protocol.WrapMessage(protocol.Config{
-			UInputSupport: true,
-			CapturableID:  0,
-			CaptureCursor: false,
-			MaxWidth:      1920,
-			MaxHeight:     1080,
-			ClientName:    "weylus-surface",
-		})
-		if err := wsjson.Write(ctx, c, config); err != nil {
-			log.Err(err).Msg("send Config")
-		}
-		msg, err = readSocket(ctx, c)
-		log.Err(err).Stack().RawJSON("msg", []byte(msg)).Msg("read socket")
-
-		for i := 0; i < 3; i++ {
-			eventMessage := protocol.WrapMessage(protocol.WheelEvent{
-				Timestamp: uint64(11968000), Dy: 60,
-			})
-
-			if err := wsjson.Write(ctx, c, eventMessage); err != nil {
-				log.Err(err).Msg("send WheelEvent")
-			}
-
-			for ctx.Err() == nil {
-				msg, err := readSocket(ctx, c)
-				log.Err(err).RawJSON("msg", []byte(msg)).Msg("read socket")
-			}
-		}
-
-		if err := c.Close(websocket.StatusNormalClosure, ""); err != nil {
-			log.Err(err).Msg("close websocket")
-		}
-		defer cancel()
-
-	}()
-
-	//window.Show()
+	go websocketHandler(ctx, cancel)
+	window.Show()
 }
 
-func readSocket(ctx context.Context, c *websocket.Conn) (string, error) {
+func websocketHandler(ctx context.Context, cancel context.CancelFunc) {
+	c, _, err := websocket.Dial(ctx, "ws://192.168.0.49:9001", nil)
+	if err != nil {
+		log.Err(err).Msg("dial websocketHandler")
+	}
+
+	if err := wsjson.Write(ctx, c, "GetCapturableList"); err != nil {
+		log.Err(err).Msg("send GetCapturableList")
+	}
+	msg, err := readSocket(ctx, c)
+	log.Err(err).Str("msg", pretty.Sprint(msg)).Msg("read socket")
+
+	config := protocol.WrapMessage(protocol.Config{
+		UInputSupport: true,
+		CapturableID:  0,
+		CaptureCursor: false,
+		MaxWidth:      1920,
+		MaxHeight:     1080,
+		ClientName:    "weylus-surface",
+	})
+	if err := wsjson.Write(ctx, c, config); err != nil {
+		log.Err(err).Msg("send Config")
+	}
+	msg, err = readSocket(ctx, c)
+	log.Err(err).Stack().Str("msg", pretty.Sprint(msg)).Msg("read socket")
+
+	for i := 0; i < 3; i++ {
+		eventMessage := protocol.WrapMessage(protocol.WheelEvent{
+			Timestamp: uint64(11968000), Dy: 60, Dx: 60,
+		})
+
+		if err := wsjson.Write(ctx, c, eventMessage); err != nil {
+			log.Err(err).Msg("send WheelEvent")
+		}
+
+		for ctx.Err() == nil {
+			msg, err := readSocket(ctx, c)
+			log.Err(err).Str("msg", pretty.Sprint(msg)).Msg("read socket")
+		}
+	}
+
+	if err := c.Close(websocket.StatusNormalClosure, ""); err != nil {
+		log.Err(err).Msg("close websocketHandler")
+	}
+	defer cancel()
+}
+
+func readSocket(ctx context.Context, c *websocket.Conn) (any, error) {
 	_, data, err := c.Read(ctx)
 	if err != nil {
-		return "", errors.Wrap(err, "read websocket")
+		return "", errors.Wrap(err, "read websocketHandler")
 	}
-	text := strings.TrimSpace(string(data))
-	if text != "" {
-		if strings.Contains(text, "ConfigError") {
-			var err2 protocol.WeylusConfigError
-			err := json.Unmarshal(data, &err2)
-			if err != nil {
-				return "", errors.New(fmt.Sprintf("failed unmarshaling error: %s", text))
-			}
-			return "", &err2
-		} else if strings.Contains(text, "Error") {
-			var err2 protocol.WeylusError
-			err := json.Unmarshal(data, &err2)
-			if err != nil {
-				return "", errors.New(fmt.Sprintf("failed unmarshaling error: %s", text))
-			}
-			return "", &err2
-		}
-		return text, nil
+	out, err := protocol.ParseMessage(data)
+	if err != nil {
+		return "", errors.Wrapf(err, "parse received data")
 	}
-	log.Warn().Msg("received empty")
-	return "", nil
+	return out, nil
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -253,6 +229,9 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		_, err := fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		if err != nil {
+			log.Err(err).Msg("print config file location")
+		}
 	}
 }

@@ -1,8 +1,11 @@
 package protocol
 
 import (
+	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -13,8 +16,8 @@ const (
 
 type Config struct {
 	UInputSupport bool   `json:"uinput_support"`
-	CapturableID  uint   `json:"capturable_id"`
 	CaptureCursor bool   `json:"capture_cursor"`
+	CapturableID  uint   `json:"capturable_id"`
 	MaxWidth      uint   `json:"max_width"`
 	MaxHeight     uint   `json:"max_height"`
 	ClientName    string `json:"client_name,omitempty"`
@@ -46,6 +49,47 @@ func WrapMessage[T MessageOutboundContent | ~string](a T) any {
 	return wrapper
 }
 
+type CapturableList struct {
+	CapturableList []string `json:"CapturableList"`
+}
+
+type MessageInbound interface {
+	CapturableList | ~string | WeylusError | WeylusConfigError
+}
+
+func ParseMessage(data []byte) (any, error) {
+	dataString := string(data)
+	switch {
+	case strings.Contains(dataString, "CapturableList"):
+		var l CapturableList
+		err := json.Unmarshal(data, &l)
+		if err != nil {
+			return nil, errors.Wrap(err, "unmarshal CapturableList")
+		}
+		return l, nil
+	case strings.Contains(dataString, "ConfigError"):
+		var err2 WeylusConfigError
+		err := json.Unmarshal(data, &err2)
+		if err != nil {
+			return "", errors.Errorf("failed unmarshaling error: %s", dataString)
+		}
+		return &err2, nil
+	case strings.Contains(dataString, "Error"):
+		var err2 WeylusError
+		err := json.Unmarshal(data, &err2)
+		if err != nil {
+			return "", errors.Errorf("failed unmarshaling error: %s", dataString)
+		}
+		return &err2, nil
+	}
+	var foo any
+	err := json.Unmarshal(data, &foo)
+	if err != nil {
+		return nil, errors.Errorf("")
+	}
+	return foo, nil
+}
+
 type WeylusError struct {
 	ErrorMessage string `json:"Error"`
 }
@@ -62,22 +106,22 @@ func (e *WeylusConfigError) Error() string {
 
 type PointerEvent struct {
 	EventType   PointerEventType `json:"event_type"`
-	PointerId   int              `json:"pointer_id"`
-	Timestamp   uint64           `json:"timestamp"`
-	IsPrimary   bool             `json:"is_primary"`
 	PointerType PointerType      `json:"pointer_type"`
-	Button      ButtonFlags      `json:"button"`
-	Buttons     ButtonFlags      `json:"buttons"`
 	X           float64          `json:"x"`
 	Y           float64          `json:"y"`
+	Pressure    float64          `json:"pressure"`
+	Width       float64          `json:"width"`
+	Height      float64          `json:"height"`
+	PointerID   int              `json:"pointer_id"`
+	Timestamp   uint64           `json:"timestamp"`
 	MovementX   int64            `json:"movement_x"`
 	MovementY   int64            `json:"movement_y"`
-	Pressure    float64          `json:"pressure"`
 	TiltX       int32            `json:"tilt_x"`
 	TiltY       int32            `json:"tilt_y"`
 	Twist       int32            `json:"twist"`
-	Width       float64          `json:"width"`
-	Height      float64          `json:"height"`
+	Button      ButtonFlags      `json:"button"`
+	Buttons     ButtonFlags      `json:"buttons"`
+	IsPrimary   bool             `json:"is_primary"`
 }
 
 type WheelEvent struct {
