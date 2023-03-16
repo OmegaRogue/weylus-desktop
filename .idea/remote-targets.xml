@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <option name="projectDefaultTargetUuid" value="b6104ead-907b-48a8-b93d-e52c6fd9ba3b" />
+    <targets>
+      <target name="omegarogue@192.168.0.86:22" type="ssh/sftp" uuid="b6104ead-907b-48a8-b93d-e52c6fd9ba3b">
+        <config>
+          <option name="projectRootOnTarget" value="$USER_HOME$/weylus-surface" />
+          <option name="serverName" value="omegarogue@192.168.0.86:22 password" />
+          <option name="useRsync" value="true" />
+        </config>
+        <ContributedStateBase type="GoLanguageRuntime">
+          <config>
+            <option name="compiledExecutablesVolume">
+              <VolumeState>
+                <option name="remotePath" value="$USER_HOME$/src/weylus-surface/out" />
+              </VolumeState>
+            </option>
+            <option name="goPath" value="$USER_HOME$/go" />
+            <option name="goRoot" value="/usr/bin/go" />
+            <option name="projectSourcesVolume">
+              <VolumeState>
+                <option name="remotePath" value="$USER_HOME$/src/weylus-surface" />
+              </VolumeState>
+            </option>
+          </config>
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>
