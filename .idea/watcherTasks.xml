@@ -26,7 +26,7 @@
       </envs>
     </TaskOptions>
     <TaskOptions isEnabled="true">
-      <option name="arguments" value="run --disable=typecheck --fast $FileDir$" />
+      <option name="arguments" value="run --disable=typecheck $FileDir$" />
       <option name="checkSyntaxErrors" value="true" />
       <option name="description" />
       <option name="exitCodeBehavior" value="NEVER" />
