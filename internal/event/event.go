@@ -317,7 +317,7 @@ func (m *ControllerManager) MotionHandler(x, y float64) {
 	}
 }
 
-func (m *ControllerManager) UnpairedReleaseHandler(x float64, y float64, button uint, _ *gdk.EventSequence) {
+func (m *ControllerManager) UnpairedReleaseHandler(x, y float64, button uint, _ *gdk.EventSequence) {
 	defer m.runCallbacks()
 	var name string
 	var source gdk.InputSource
@@ -364,21 +364,21 @@ func (m *ControllerManager) UnpairedReleaseHandler(x float64, y float64, button 
 	}
 }
 
-func (m *ControllerManager) DragBeginHandler(x float64, y float64) {
+func (m *ControllerManager) DragBeginHandler(x, y float64) {
 	defer m.runCallbacks()
 	m.TouchState.X = x
 	m.TouchState.Y = y
 	m.TouchState.Timestamp = uint64(time.Now().UnixMilli())
 }
 
-func (m *ControllerManager) DragEndHandler(x float64, y float64) {
+func (m *ControllerManager) DragEndHandler(x, y float64) {
 	defer m.runCallbacks()
 	m.TouchState.X = x
 	m.TouchState.Y = y
 	m.TouchState.Timestamp = uint64(time.Now().UnixMilli())
 }
 
-func (m *ControllerManager) DragUpdateHandler(x float64, y float64) {
+func (m *ControllerManager) DragUpdateHandler(x, y float64) {
 	defer m.runCallbacks()
 	m.TouchState.X = x
 	m.TouchState.Y = y
