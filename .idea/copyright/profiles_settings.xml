@@ -1,0 +1,8 @@
+<component name="CopyrightManager">
+  <settings default="GPL-3.0">
+    <module2copyright>
+      <element module="All" copyright="GPL-3.0" />
+    </module2copyright>
+    <LanguageOptions name="Go" />
+  </settings>
+</component>
