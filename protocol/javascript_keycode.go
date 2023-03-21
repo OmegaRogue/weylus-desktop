@@ -27,6 +27,7 @@ type KeyData struct {
 	Location KeyboardLocation
 }
 
+//goland:noinspection SpellCheckingInspection
 var (
 	CodeValue = map[uint]string{
 		0x0009: "Escape",

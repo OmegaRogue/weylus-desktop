@@ -22,15 +22,11 @@ package protocol
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
-)
-
-const (
-	CommandTryGetFrame       = "TryGetFrame"
-	CommandGetCapturableList = "GetCapturableList"
 )
 
 type Config struct {
@@ -43,27 +39,27 @@ type Config struct {
 }
 
 type MessageOutboundContent interface {
-	PointerEvent | WheelEvent | KeyboardEvent | Config
+	PointerEvent | WheelEvent | KeyboardEvent | Config | ~string
 }
 type MessageOutbound interface {
-	map[string]PointerEvent | map[string]WheelEvent | map[string]KeyboardEvent | map[string]Config | ~string
+	map[WeylusCommand]PointerEvent | map[WeylusCommand]WheelEvent | map[WeylusCommand]KeyboardEvent | map[WeylusCommand]Config | ~string
 }
 
 func WrapMessage[T MessageOutboundContent | ~string](a T) any {
-	wrapper := make(map[string]T)
+	wrapper := make(map[WeylusCommand]T)
 	switch any(a).(type) {
 	case PointerEvent:
-		wrapper["PointerEvent"] = a
+		wrapper[WeylusCommandPointerEvent] = a
 	case WheelEvent:
-		wrapper["WheelEvent"] = a
+		wrapper[WeylusCommandWheelEvent] = a
 	case KeyboardEvent:
-		wrapper["KeyboardEvent"] = a
+		wrapper[WeylusCommandKeyboardEvent] = a
 	case Config:
-		wrapper["Config"] = a
-	case string:
+		wrapper[WeylusCommandConfig] = a
+	case string, WeylusCommand:
 		return a
 	default:
-		log.Fatal().Msg("invalid type")
+		log.Fatal().Interface("result", a).Str("type", reflect.TypeOf(a).String()).Msg("invalid type")
 	}
 	return wrapper
 }
@@ -79,32 +75,32 @@ type MessageInbound interface {
 func ParseMessage(data []byte) (any, error) {
 	dataString := string(data)
 	switch {
-	case strings.Contains(dataString, "CapturableList"):
+	case strings.Contains(dataString, string(WeylusResponseCapturableList)):
 		var l CapturableList
 		err := json.Unmarshal(data, &l)
 		if err != nil {
 			return nil, errors.Wrap(err, "unmarshal CapturableList")
 		}
 		return l, nil
-	case strings.Contains(dataString, "ConfigError"):
+	case strings.Contains(dataString, string(WeylusResponseConfigError)):
 		var err2 WeylusConfigError
 		err := json.Unmarshal(data, &err2)
 		if err != nil {
-			return "", errors.Errorf("failed unmarshaling error: %s", dataString)
+			return nil, errors.Wrapf(err, "failed unmarshaling error: %s", dataString)
 		}
 		return &err2, nil
-	case strings.Contains(dataString, "Error"):
+	case strings.Contains(dataString, string(WeylusResponseError)):
 		var err2 WeylusError
 		err := json.Unmarshal(data, &err2)
 		if err != nil {
-			return "", errors.Errorf("failed unmarshaling error: %s", dataString)
+			return nil, errors.Wrapf(err, "failed unmarshaling error: %s", dataString)
 		}
 		return &err2, nil
 	}
 	var foo any
 	err := json.Unmarshal(data, &foo)
 	if err != nil {
-		return nil, errors.Errorf("")
+		return nil, errors.Wrapf(err, "failed unmarshaling data: %s", dataString)
 	}
 	return foo, nil
 }

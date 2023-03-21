@@ -1,3 +1,4 @@
+#file: noinspection SpellCheckingInspection
 run:
   skip-files:
     - ".*_enum\\.go$"
@@ -28,7 +29,14 @@ linters:
     - stylecheck
     - whitespace
     - goheader
+    - errcheck
+    - revive
 linters-settings:
+  revive:
+    rules:
+      - name: datarace
+        severity: warning
+        disabled: false
   goheader:
     values:
       const:

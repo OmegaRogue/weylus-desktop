@@ -27,47 +27,51 @@ import (
 	"github.com/diamondburned/gotk4/pkg/cairo"
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
-	"github.com/kr/pretty"
-	"github.com/pkg/errors"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/rs/zerolog/pkgerrors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"nhooyr.io/websocket"
-	"nhooyr.io/websocket/wsjson"
+	"weylus-surface/client"
 	"weylus-surface/internal/event"
 	"weylus-surface/protocol"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	rootCmd = NewRootCmd()
+)
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "weylus-surface",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
+// NewRootCmd returns a new command which
+// represents the base command when called without any subcommands
+func NewRootCmd() *cobra.Command {
+	rootCmd := &cobra.Command{
+		Use:   "weylus-surface",
+		Short: "A brief description of your application",
+		Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, args []string) {
+			app := gtk.NewApplication("codes.omegavoid.weylus-client", gio.ApplicationFlagsNone)
+			app.ConnectActivate(func() { activate(app) })
+			if code := app.Run(os.Args); code > 0 {
+				os.Exit(code)
+			}
+		},
+	}
 
-		app := gtk.NewApplication("codes.omegavoid.weylus-client", gio.ApplicationFlagsNone)
-		app.ConnectActivate(func() { activate(app) })
+	// Here you will define your flags and configuration settings.
+	// Cobra supports persistent flags, which, if defined here,
+	// will be global for your application.
 
-		if code := app.Run(os.Args); code > 0 {
-			os.Exit(code)
-		}
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.weylus-surface.yaml)")
 
-	},
-	CompletionOptions: cobra.CompletionOptions{
-		DisableDefaultCmd:   false,
-		DisableNoDescFlag:   false,
-		DisableDescriptions: false,
-		HiddenDefaultCmd:    false,
-	},
+	// Cobra also supports local flags, which will only run
+	// when this action is called directly.
+	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	return rootCmd
 }
 
 type State struct {
@@ -81,7 +85,7 @@ func activate(app *gtk.Application) {
 	drawArea := gtk.NewDrawingArea()
 	drawArea.SetVExpand(true)
 	drawArea.SetDrawFunc(func(draw *gtk.DrawingArea, cr *cairo.Context, w, h int) {
-		// Draw a red rectagle at the X and Y location.
+		// Draw a red rectangle at the X and Y location.
 		cr.SetSourceRGB(255, 0, 0)
 		cr.Fill()
 	})
@@ -96,6 +100,7 @@ func activate(app *gtk.Application) {
 	keyLabel.SetHAlign(gtk.AlignStart)
 	scrollLabel := gtk.NewLabel("")
 	scrollLabel.SetHAlign(gtk.AlignStart)
+
 	layout := gtk.NewGrid()
 	layout.Attach(stylusLabel, 0, 0, 1, 1)
 	layout.Attach(clickLabel, 0, 1, 1, 1)
@@ -104,7 +109,6 @@ func activate(app *gtk.Application) {
 	layout.Attach(scrollLabel, 0, 4, 1, 1)
 
 	manager := event.NewControllerManager()
-
 	manager.AddCallback(func(m *event.ControllerManager) {
 		stylusLabel.SetMarkup(fmt.Sprintf("<span font_desc=\"mono\">%v</span>", m.StylusState))
 		clickLabel.SetMarkup(fmt.Sprintf("<span font_desc=\"mono\">%v</span>", m.MouseState))
@@ -120,73 +124,38 @@ func activate(app *gtk.Application) {
 	manager.ConnectControllers(overlay)
 	window.AddController(manager.Key)
 	window.AddController(manager.Scroll)
-
 	overlay.SetChild(layout)
 	overlay.AddOverlay(drawArea)
 	window.SetChild(overlay)
 	window.SetDefaultSize(400, 300)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*10)
-	go websocketHandler(ctx, cancel)
-	window.Show()
-}
+	ctx, _ := context.WithTimeout(context.Background(), time.Minute*10)
 
-func websocketHandler(ctx context.Context, cancel context.CancelFunc) {
-	c, _, err := websocket.Dial(ctx, "ws://192.168.0.49:9001", nil)
+	weylusClient := client.NewWeylusClient(ctx, 30)
+
+	if err := weylusClient.Dial("ws://192.168.0.49:9001"); err != nil {
+		log.Err(err).Msg("dial weylusClient")
+	}
+	go weylusClient.Listen()
+	go weylusClient.Run()
+	go weylusClient.RunVideo()
+
+	capturables, err := weylusClient.GetCapturableList()
 	if err != nil {
-		log.Err(err).Msg("dial websocketHandler")
+		log.Err(err).Msg("get capturables")
 	}
+	log.Debug().Strs("capturables", capturables.CapturableList).Msg("get capturables")
 
-	if err := wsjson.Write(ctx, c, "GetCapturableList"); err != nil {
-		log.Err(err).Msg("send GetCapturableList")
-	}
-	msg, err := readSocket(ctx, c)
-	log.Err(err).Str("msg", pretty.Sprint(msg)).Msg("read socket")
-
-	config := protocol.WrapMessage(protocol.Config{
+	if _, err := weylusClient.Config(protocol.Config{
 		UInputSupport: true,
-		CapturableID:  0,
-		CaptureCursor: false,
+		CapturableID:  1,
+		CaptureCursor: true,
 		MaxWidth:      1920,
 		MaxHeight:     1080,
 		ClientName:    "weylus-surface",
-	})
-	if err := wsjson.Write(ctx, c, config); err != nil {
+	}); err != nil {
 		log.Err(err).Msg("send Config")
 	}
-	msg, err = readSocket(ctx, c)
-	log.Err(err).Stack().Str("msg", pretty.Sprint(msg)).Msg("read socket")
-
-	for i := 0; i < 3; i++ {
-		eventMessage := protocol.WrapMessage(protocol.WheelEvent{
-			Timestamp: uint64(11968000), Dy: 60, Dx: 60,
-		})
-
-		if err := wsjson.Write(ctx, c, eventMessage); err != nil {
-			log.Err(err).Msg("send WheelEvent")
-		}
-
-		for ctx.Err() == nil {
-			msg, err := readSocket(ctx, c)
-			log.Err(err).Str("msg", pretty.Sprint(msg)).Msg("read socket")
-		}
-	}
-
-	if err := c.Close(websocket.StatusNormalClosure, ""); err != nil {
-		log.Err(err).Msg("close websocketHandler")
-	}
-	defer cancel()
-}
-
-func readSocket(ctx context.Context, c *websocket.Conn) (any, error) {
-	_, data, err := c.Read(ctx)
-	if err != nil {
-		return "", errors.Wrap(err, "read websocketHandler")
-	}
-	out, err := protocol.ParseMessage(data)
-	if err != nil {
-		return "", errors.Wrapf(err, "parse received data")
-	}
-	return out, nil
+	window.Show()
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -194,26 +163,12 @@ func readSocket(ctx context.Context, c *websocket.Conn) (any, error) {
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		os.Exit(1)
+		log.Fatal().Err(err).Msg("exit with error")
 	}
 }
 
 func init() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout}).With().Caller().Stack().Logger()
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-
 	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.weylus-surface.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.

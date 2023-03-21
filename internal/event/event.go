@@ -98,7 +98,7 @@ func NewControllerManager() *ControllerManager {
 }
 
 func (m *ControllerManager) ScrollHandler(dx, dy float64) (ok bool) {
-	ok = true
+	ok = false
 	m.ScrollState.Timestamp = uint64(time.Now().UnixMilli())
 	defer m.runCallbacks()
 	m.ScrollState.Dx = int32(math.Round(10 * dx))
@@ -106,8 +106,8 @@ func (m *ControllerManager) ScrollHandler(dx, dy float64) (ok bool) {
 	return
 }
 
-func (m *ControllerManager) KeyDownHandler(keyval, keycode uint, state gdk.ModifierType) (ok bool) {
-	ok = true
+func (m *ControllerManager) KeyDownHandler(keyVal, keycode uint, state gdk.ModifierType) (ok bool) {
+	ok = false
 	defer m.runCallbacks()
 	m.KeyState.Alt = state.Has(gdk.AltMask)
 	m.KeyState.Shift = state.Has(gdk.ShiftMask)
@@ -117,15 +117,15 @@ func (m *ControllerManager) KeyDownHandler(keyval, keycode uint, state gdk.Modif
 	m.KeyState.Code = protocol.CodeValue[keycode]
 	m.KeyState.Location = protocol.KeyboardLocationStandard
 	var ok2 bool
-	m.KeyState.Key, ok2 = protocol.KeyValue[keyval]
+	m.KeyState.Key, ok2 = protocol.KeyValue[keyVal]
 	if !ok2 {
-		m.KeyState.Key = string(rune(gdk.KeyvalToUnicode(keyval)))
+		m.KeyState.Key = string(rune(gdk.KeyvalToUnicode(keyVal)))
 	}
 	m.KeyState.EventType = protocol.KeyboardEventTypeDown
 
 	return
 }
-func (m *ControllerManager) KeyReleasedHandler(keyval, keycode uint, state gdk.ModifierType) {
+func (m *ControllerManager) KeyReleasedHandler(keyVal, keycode uint, state gdk.ModifierType) {
 	defer m.runCallbacks()
 	m.KeyState.Alt = state.Has(gdk.AltMask)
 	m.KeyState.Shift = state.Has(gdk.ShiftMask)
@@ -135,18 +135,18 @@ func (m *ControllerManager) KeyReleasedHandler(keyval, keycode uint, state gdk.M
 	m.KeyState.Code = protocol.CodeValue[keycode]
 	m.KeyState.Location = protocol.KeyboardLocationStandard
 	var ok bool
-	m.KeyState.Key, ok = protocol.KeyValue[keyval]
+	m.KeyState.Key, ok = protocol.KeyValue[keyVal]
 	if !ok {
-		m.KeyState.Key = string(rune(gdk.KeyvalToUnicode(keyval)))
+		m.KeyState.Key = string(rune(gdk.KeyvalToUnicode(keyVal)))
 	}
 	m.KeyState.EventType = protocol.KeyboardEventTypeUp
 }
-func (m *ControllerManager) KeyModHandler(keyval gdk.ModifierType) (ok bool) {
-	ok = true
-	m.KeyState.Alt = keyval.Has(gdk.AltMask)
-	m.KeyState.Shift = keyval.Has(gdk.ShiftMask)
-	m.KeyState.Ctrl = keyval.Has(gdk.ControlMask)
-	m.KeyState.Meta = keyval.Has(gdk.MetaMask)
+func (m *ControllerManager) KeyModHandler(keyVal gdk.ModifierType) (ok bool) {
+	ok = false
+	m.KeyState.Alt = keyVal.Has(gdk.AltMask)
+	m.KeyState.Shift = keyVal.Has(gdk.ShiftMask)
+	m.KeyState.Ctrl = keyVal.Has(gdk.ControlMask)
+	m.KeyState.Meta = keyVal.Has(gdk.MetaMask)
 	return
 }
 
@@ -209,7 +209,7 @@ func (m *ControllerManager) StylusMotionEventHandler(x, y float64) {
 	defer m.runCallbacks()
 }
 
-func (m *ControllerManager) PressedHandler(press int, x, y float64) {
+func (m *ControllerManager) PressedHandler(_ int, x, y float64) {
 	defer m.runCallbacks()
 	name := m.Click.CurrentEventDevice().ObjectProperty("name").(string)
 	source := m.Click.CurrentEventDevice().ObjectProperty("source").(gdk.InputSource)
@@ -249,7 +249,7 @@ func (m *ControllerManager) PressedHandler(press int, x, y float64) {
 	}
 }
 
-func (m *ControllerManager) ReleasedHandler(press int, x, y float64) {
+func (m *ControllerManager) ReleasedHandler(_ int, x, y float64) {
 	defer m.runCallbacks()
 	name := m.Click.CurrentEventDevice().ObjectProperty("name").(string)
 	source := m.Click.CurrentEventDevice().ObjectProperty("source").(gdk.InputSource)

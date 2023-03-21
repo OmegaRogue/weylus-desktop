@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/coreos/go-systemd/v22 v22.3.3-0.20220203105225-a9a7ef127534
 	github.com/diamondburned/gotk4/pkg v0.0.5
+	github.com/kr/pretty v0.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.29.0
 	github.com/samber/lo v1.37.0
