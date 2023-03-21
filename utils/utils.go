@@ -16,32 +16,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Package main
-package main
+package utils
 
 import (
-	stdlog "log"
-	"os"
-
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/rs/zerolog/pkgerrors"
-	"weylus-surface/cmd"
-	"weylus-surface/journald"
+	"github.com/samber/lo"
 )
 
-func main() {
-	consoleWriter := zerolog.ConsoleWriter{
-		Out:           os.Stderr,
-		FieldsExclude: []string{"", ""},
-	}
-	multi := zerolog.MultiLevelWriter(consoleWriter, journald.NewBetterJournaldWriter())
-	log.Logger = log.Output(multi).With().Caller().Stack().Logger().Hook(journald.ThreadHook{})
-	stdlog.SetFlags(0)
-	stdLogger := log.With().Str("component", "stdlog").Logger()
-	stdlog.SetOutput(stdLogger)
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-
-	cmd.Execute()
+func Remove[V any](collection []V, index int) []V {
+	return lo.Filter(collection, func(_ V, i int) bool {
+		return i != index
+	})
 }
