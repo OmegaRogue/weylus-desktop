@@ -23,13 +23,12 @@ import (
 	stdlog "log"
 	"os"
 
-	"github.com/diamondburned/gotk4/pkg/glib/v2"
+	"github.com/OmegaRogue/weylus-desktop/cmd"
+	"github.com/OmegaRogue/weylus-desktop/logger/gliblogger"
+	"github.com/OmegaRogue/weylus-desktop/logger/journald"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/rs/zerolog/pkgerrors"
-	"weylus-surface/cmd"
-	"weylus-surface/logger/gliblogger"
-	"weylus-surface/logger/journald"
 )
 
 func main() {
@@ -42,9 +41,9 @@ func main() {
 	stdlog.SetFlags(0)
 	stdLogger := log.With().Str("component", "stdlog").Logger()
 	stdlog.SetOutput(stdLogger)
-	glibLog := log.With().Str("component", "glib").Logger()
-	glib.LogSetWriter(gliblogger.LoggerHandler(glibLog))
-	zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	//glibLog := log.With().Str("component", "glib").Logger()
+	//glib.LogSetWriter(gliblogger.LoggerHandler(glibLog))
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 
 	cmd.Execute()

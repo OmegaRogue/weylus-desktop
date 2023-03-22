@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 // Package event
 package event
 
@@ -24,9 +23,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OmegaRogue/weylus-desktop/client"
+	"github.com/OmegaRogue/weylus-desktop/protocol"
 	"github.com/diamondburned/gotk4/pkg/gdk/v4"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
-	"weylus-surface/protocol"
 )
 
 type ControllerManager struct {
@@ -42,6 +42,8 @@ type ControllerManager struct {
 	MouseState  protocol.PointerEvent
 	KeyState    protocol.KeyboardEvent
 	ScrollState protocol.WheelEvent
+
+	WeylusClient client.WeylusClient
 
 	callbacks []func(m *ControllerManager)
 }

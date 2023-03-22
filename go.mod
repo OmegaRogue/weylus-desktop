@@ -1,4 +1,4 @@
-module weylus-surface
+module github.com/OmegaRogue/weylus-desktop
 
 go 1.20
 

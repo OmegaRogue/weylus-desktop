@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package journald
 
 import (
@@ -26,11 +25,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/OmegaRogue/weylus-desktop/utils/pthread"
 	"github.com/coreos/go-systemd/v22/journal"
 	"github.com/coreos/go-systemd/v22/sdjournal"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
-	"weylus-surface/utils/pthread"
 )
 
 const (

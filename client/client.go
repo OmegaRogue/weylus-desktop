@@ -15,22 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package client
 
 import (
 	"context"
 	"os"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/OmegaRogue/weylus-desktop/protocol"
+	"github.com/OmegaRogue/weylus-desktop/utils"
+	"github.com/kr/pretty"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
-	"weylus-surface/protocol"
-	"weylus-surface/utils"
 )
 
 var WebsocketNotStartedError = errors.New("Websocket not initialized")
@@ -97,7 +98,8 @@ func commandWithReceive[T protocol.MessageInbound, V protocol.MessageOutboundCon
 		if b, ok := r.(T); ok {
 			a = b
 		} else {
-			err = errors.New("wrong type returned by ParseMessage")
+
+			err = errors.Errorf("wrong type returned by ParseMessage: %v\n %v", reflect.TypeOf(r), pretty.Sprint(b))
 		}
 		wg.Done()
 	})
@@ -115,7 +117,11 @@ func (w *WeylusClient) GetCapturableList() (protocol.CapturableList, error) {
 	return commandWithReceive[protocol.CapturableList](w, protocol.WeylusCommandGetCapturableList)
 }
 func (w *WeylusClient) Config(config protocol.Config) (protocol.WeylusResponse, error) {
-	return commandWithReceive[protocol.WeylusResponse](w, config)
+	resp, err := commandWithReceive[string](w, config)
+	if err != nil {
+		return protocol.WeylusResponseError, errors.Wrap(err, "error on receive")
+	}
+	return protocol.ParseWeylusResponse(resp)
 }
 
 func (w *WeylusClient) TryGetFrame() error {
@@ -180,7 +186,6 @@ func (w *WeylusClient) Listen() {
 			log.Ctx(w.ctx).Err(errors.Wrap(w.ctx.Err(), "closed context")).Msg("closed context")
 			return
 		default:
-			log.Ctx(w.ctx).Info().Msg("test1")
 			t, d, err := w.ws.Read(w.ctx)
 			if err != nil {
 				_ = w.Close()
@@ -205,6 +210,7 @@ func (w *WeylusClient) Close() error {
 }
 
 func (w *WeylusClient) Run() {
+	// avoid racecondition
 	time.Sleep(time.Second)
 	for {
 		select {
@@ -214,7 +220,6 @@ func (w *WeylusClient) Run() {
 		case msg := <-w.msgs:
 			switch msg.Type {
 			case websocket.MessageText:
-				log.Ctx(w.ctx).Info().Msg("test2")
 				log.Ctx(w.ctx).Info().RawJSON("data", msg.Data).Msg("received data")
 				for response, callbacks := range w.callbacks {
 					if strings.Contains(string(msg.Data), string(response)) {
@@ -224,7 +229,6 @@ func (w *WeylusClient) Run() {
 					}
 				}
 			case websocket.MessageBinary:
-				log.Ctx(w.ctx).Info().Msg("test4")
 				if _, err := os.Stdout.Write(msg.Data); err != nil {
 					log.Ctx(w.ctx).Err(err).Msg("error on write data")
 				}

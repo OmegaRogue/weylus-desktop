@@ -24,15 +24,15 @@ import (
 	"os"
 	"time"
 
+	"github.com/OmegaRogue/weylus-desktop/client"
+	"github.com/OmegaRogue/weylus-desktop/internal/event"
+	"github.com/OmegaRogue/weylus-desktop/protocol"
 	"github.com/diamondburned/gotk4/pkg/cairo"
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"weylus-surface/client"
-	"weylus-surface/internal/event"
-	"weylus-surface/protocol"
 )
 
 var (
@@ -42,9 +42,10 @@ var (
 
 // NewRootCmd returns a new command which
 // represents the base command when called without any subcommands
+// TODO add description
 func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "weylus-surface",
+		Use:   "weylus-desktop",
 		Short: "A brief description of your application",
 		Long: `A longer description that spans multiple lines and likely contains
 examples and usage of using your application. For example:
@@ -65,7 +66,7 @@ to quickly create a Cobra application.`,
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.weylus-surface.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.weylus-desktop.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -101,12 +102,26 @@ func activate(app *gtk.Application) {
 	scrollLabel := gtk.NewLabel("")
 	scrollLabel.SetHAlign(gtk.AlignStart)
 
+	vfs := gio.VFSGetLocal()
+	file := vfs.FileForURI("rtmp://localhost:1935/live/app")
+	log.Info().Msg(file.URI())
+	video := gtk.NewVideo()
+	video.SetFile(file)
+	video.SetVExpand(true)
+	video.SetHExpand(true)
+	go func() {
+		time.Sleep(time.Second * 20)
+		video.SetAutoplay(true)
+		log.Info().Msg("start")
+	}()
+
 	layout := gtk.NewGrid()
 	layout.Attach(stylusLabel, 0, 0, 1, 1)
 	layout.Attach(clickLabel, 0, 1, 1, 1)
 	layout.Attach(touchLabel, 0, 2, 1, 1)
 	layout.Attach(keyLabel, 0, 3, 1, 1)
 	layout.Attach(scrollLabel, 0, 4, 1, 1)
+	layout.Attach(video, 0, 5, 1, 1)
 
 	manager := event.NewControllerManager()
 	manager.AddCallback(func(m *event.ControllerManager) {
@@ -141,17 +156,18 @@ func activate(app *gtk.Application) {
 
 	capturables, err := weylusClient.GetCapturableList()
 	if err != nil {
-		log.Err(err).Msg("get capturables")
+		log.Fatal().Err(err).Msg("get capturables")
+	} else {
+		log.Debug().Strs("capturables", capturables.CapturableList).Msg("get capturables")
 	}
-	log.Debug().Strs("capturables", capturables.CapturableList).Msg("get capturables")
 
 	if _, err := weylusClient.Config(protocol.Config{
 		UInputSupport: true,
 		CapturableID:  1,
 		CaptureCursor: true,
-		MaxWidth:      1920,
-		MaxHeight:     1080,
-		ClientName:    "weylus-surface",
+		MaxWidth:      640,
+		MaxHeight:     480,
+		ClientName:    "weylus-desktop",
 	}); err != nil {
 		log.Err(err).Msg("send Config")
 	}
@@ -181,10 +197,10 @@ func initConfig() {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".weylus-surface" (without extension).
+		// Search config in home directory with name ".weylus-desktop" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
-		viper.SetConfigName(".weylus-surface")
+		viper.SetConfigName(".weylus-desktop")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
