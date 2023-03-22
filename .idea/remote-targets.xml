@@ -5,7 +5,7 @@
     <targets>
       <target name="omegarogue@192.168.0.86:22" type="ssh/sftp" uuid="b6104ead-907b-48a8-b93d-e52c6fd9ba3b">
         <config>
-          <option name="projectRootOnTarget" value="$USER_HOME$/weylus-surface" />
+          <option name="projectRootOnTarget" value="$USER_HOME$/weylus-desktop" />
           <option name="serverName" value="omegarogue@192.168.0.86:22 password" />
           <option name="useRsync" value="true" />
         </config>
@@ -13,14 +13,14 @@
           <config>
             <option name="compiledExecutablesVolume">
               <VolumeState>
-                <option name="remotePath" value="$USER_HOME$/src/weylus-surface/out" />
+                <option name="remotePath" value="$USER_HOME$/src/weylus-desktop/out" />
               </VolumeState>
             </option>
             <option name="goPath" value="$USER_HOME$/go" />
             <option name="goRoot" value="/usr/bin/go" />
             <option name="projectSourcesVolume">
               <VolumeState>
-                <option name="remotePath" value="$USER_HOME$/src/weylus-surface" />
+                <option name="remotePath" value="$USER_HOME$/src/weylus-desktop" />
               </VolumeState>
             </option>
           </config>
