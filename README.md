@@ -2,12 +2,11 @@
 
 [![Go reference][1]][2]
 ![GitHub go.mod Go version][3]
-[![GoReportCard example][4]][5]
+[![Go Report Card][4]][5]
 [![GitHub license][6]][7]
 ![Please theme this app][8]
 
 Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
-
 
 [1]: https://img.shields.io/badge/godoc-reference-blue.svg
 
