@@ -18,8 +18,8 @@
 package client
 
 import (
+	"bufio"
 	"context"
-	"os"
 	"reflect"
 	"strings"
 	"sync"
@@ -46,6 +46,7 @@ type WeylusClient struct {
 	cancel        context.CancelFunc
 	Framerate     uint
 	frameTimer    *time.Ticker
+	BufPipe       *bufio.ReadWriter
 }
 
 func (w *WeylusClient) AddCallback(event protocol.WeylusResponse, callback Callback) int {
@@ -229,7 +230,7 @@ func (w *WeylusClient) Run() {
 					}
 				}
 			case websocket.MessageBinary:
-				if _, err := os.Stdout.Write(msg.Data); err != nil {
+				if _, err := w.BufPipe.Write(msg.Data); err != nil {
 					log.Ctx(w.ctx).Err(err).Msg("error on write data")
 				}
 			}

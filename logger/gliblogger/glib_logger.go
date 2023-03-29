@@ -114,7 +114,6 @@ func LoggerHandler(l zerolog.Logger) glib.LogWriterFunc {
 		// Probably never.
 		level := strings.TrimPrefix(lvl.String(), "Level")
 		event.Str(GlibLevelFieldName, level)
-
 		if !Lfile || (codeFile == "" && codeLine == "") {
 			event.Send()
 			return glib.LogWriterHandled

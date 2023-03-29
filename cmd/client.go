@@ -21,7 +21,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/OmegaRogue/weylus-desktop/client"
@@ -32,6 +35,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // clientCmd represents the client command
@@ -44,7 +48,11 @@ func NewClientCmd() *cobra.Command {
 		Short: "Start the weylus-desktop client",
 		Long:  `Start the weylus-desktop client`,
 		Run: func(cmd *cobra.Command, args []string) {
-			app := gtk.NewApplication("codes.omegavoid.weylus-client", gio.ApplicationFlagsNone)
+			app := gtk.NewApplication("codes.omegavoid.weylus-desktop", gio.ApplicationHandlesCommandLine)
+			app.ConnectCommandLine(func(commandLine *gio.ApplicationCommandLine) (gint int) {
+				app.Activate()
+				return 0
+			})
 			app.ConnectActivate(func() { activate(app) })
 			if code := app.Run(os.Args); code > 0 {
 				os.Exit(code)
@@ -59,7 +67,10 @@ func NewClientCmd() *cobra.Command {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// clientCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	clientCmd.Flags().StringP("hostname", "", "localhost", "Hostname to connect to")
+	if err := viper.BindPFlag("hostname", clientCmd.Flags().Lookup("hostname")); err != nil {
+		log.Fatal().Err(err).Msg("failed binding flag hostname")
+	}
 	return clientCmd
 }
 
@@ -94,26 +105,12 @@ func activate(app *gtk.Application) {
 	scrollLabel := gtk.NewLabel("")
 	scrollLabel.SetHAlign(gtk.AlignStart)
 
-	vfs := gio.VFSGetLocal()
-	file := vfs.FileForURI("rtmp://localhost:1935/live/app")
-	log.Info().Msg(file.URI())
-	video := gtk.NewVideo()
-	video.SetFile(file)
-	video.SetVExpand(true)
-	video.SetHExpand(true)
-	go func() {
-		time.Sleep(time.Second * 20)
-		video.SetAutoplay(true)
-		log.Info().Msg("start")
-	}()
-
 	layout := gtk.NewGrid()
 	layout.Attach(stylusLabel, 0, 0, 1, 1)
 	layout.Attach(clickLabel, 0, 1, 1, 1)
 	layout.Attach(touchLabel, 0, 2, 1, 1)
 	layout.Attach(keyLabel, 0, 3, 1, 1)
 	layout.Attach(scrollLabel, 0, 4, 1, 1)
-	layout.Attach(video, 0, 5, 1, 1)
 
 	manager := event.NewControllerManager()
 	manager.AddCallback(func(m *event.ControllerManager) {
@@ -136,10 +133,14 @@ func activate(app *gtk.Application) {
 	window.SetChild(overlay)
 	window.SetDefaultSize(400, 300)
 	ctx, _ := context.WithTimeout(context.Background(), time.Minute*10)
-
 	weylusClient := client.NewWeylusClient(ctx, 30)
 
-	if err := weylusClient.Dial("ws://192.168.0.49:9001"); err != nil {
+	address := url.URL{
+		Scheme: "ws",
+		Host:   net.JoinHostPort(viper.GetString("hostname"), strconv.FormatUint(uint64(viper.GetUint16("websocket-port")), 10)),
+	}
+
+	if err := weylusClient.Dial(address.String()); err != nil {
 		log.Err(err).Msg("dial weylusClient")
 	}
 	go weylusClient.Listen()

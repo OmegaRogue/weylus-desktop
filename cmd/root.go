@@ -45,8 +45,7 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-		//Run: func(cmd *cobra.Command, args []string) {
-		//},
+		//Run: func(cmd *cobra.Command, args []string) { },
 	}
 
 	// Here you will define your flags and configuration settings.
@@ -54,10 +53,15 @@ to quickly create a Cobra application.`,
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.weylus-desktop.yaml)")
+	rootCmd.PersistentFlags().Uint16P("websocket-port", "", 9001, "Websocket port")
+	rootCmd.PersistentFlags().StringP("access-code", "", "", "Access code")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	if err := viper.BindPFlag("websocket-port", rootCmd.PersistentFlags().Lookup("websocket-port")); err != nil {
+		log.Fatal().Err(err).Msg("failed binding flag websocket-port")
+	}
+	if err := viper.BindPFlag("access-code", rootCmd.Flags().Lookup("access-code")); err != nil {
+		log.Fatal().Err(err).Msg("failed binding flag access-code")
+	}
 
 	return rootCmd
 }
