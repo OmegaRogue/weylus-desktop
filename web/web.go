@@ -18,7 +18,9 @@
 
 package web
 
-import _ "embed"
+import (
+	_ "embed"
+)
 
 //go:embed index.gohtml
 var IndexHTML string

@@ -99,7 +99,6 @@ func commandWithReceive[T protocol.MessageInbound, V protocol.MessageOutboundCon
 		if b, ok := r.(T); ok {
 			a = b
 		} else {
-
 			err = errors.Errorf("wrong type returned by ParseMessage: %v\n %v", reflect.TypeOf(r), pretty.Sprint(b))
 		}
 		wg.Done()

@@ -20,9 +20,16 @@ package cmd
 
 import (
 	"fmt"
+	"html/template"
 	"net"
+	"net/http"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/OmegaRogue/weylus-desktop/web"
+	"github.com/justinas/alice"
+	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -30,6 +37,50 @@ import (
 
 // serverCmd represents the client command
 var serverCmd = NewServerCmd()
+
+func startWeylusServer() {
+	serverLogger := log.With().Str("component", "server").Logger()
+	c := alice.New()
+	c = c.Append(hlog.NewHandler(serverLogger))
+	c = c.Append(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
+		hlog.FromRequest(r).Info().
+			Str("method", r.Method).
+			Stringer("url", r.URL).
+			Int("status", status).
+			Int("size", size).
+			Dur("duration", duration).
+			Msg("")
+	}))
+
+	c = c.Append(hlog.RemoteAddrHandler("ip"))
+	c = c.Append(hlog.UserAgentHandler("user_agent"))
+	c = c.Append(hlog.RefererHandler("referer"))
+	c = c.Append(hlog.RequestIDHandler("req_id", "Request-Id"))
+
+	h := c.Then(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+
+		tmpl, err := template.New("IndexHTML").Parse(web.IndexHTML)
+		if err != nil {
+			hlog.FromRequest(r).Err(err).Msg("error on parse template")
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		if err := tmpl.Execute(w, struct{ Test string }{Test: "test"}); err != nil {
+			hlog.FromRequest(r).Err(err).Msg("error on execute template")
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}))
+	http.Handle("/", h)
+	startWeylusWeb()
+}
+
+func startWeylusWeb() {
+
+	if err := http.ListenAndServe(net.JoinHostPort(viper.GetString("hostname"), strconv.FormatUint(uint64(viper.GetUint16("web-port")), 10)), nil); err != nil {
+		log.Fatal().Err(err).Msg("Startup failed")
+	}
+}
 
 // NewServerCmd creates a new server command
 //
@@ -40,6 +91,34 @@ func NewServerCmd() *cobra.Command {
 		Short: "Start the weylus-desktop server",
 		Long:  `Start the weylus-desktop server`,
 		Run: func(cmd *cobra.Command, args []string) {
+			if accessPath := viper.GetString("custom-access-html"); accessPath != "" {
+				data, err := os.ReadFile(accessPath)
+				if err != nil {
+					log.Fatal().Err(err).Str("path", accessPath).Msg("failed reading file")
+				}
+				web.AccessHTML = string(data)
+			}
+			if indexPath := viper.GetString("custom-index-html"); indexPath != "" {
+				data, err := os.ReadFile(indexPath)
+				if err != nil {
+					log.Fatal().Err(err).Str("path", indexPath).Msg("failed reading file")
+				}
+				web.IndexHTML = string(data)
+			}
+			if libPath := viper.GetString("custom-lib-js"); libPath != "" {
+				data, err := os.ReadFile(libPath)
+				if err != nil {
+					log.Fatal().Err(err).Str("path", libPath).Msg("failed reading file")
+				}
+				web.LibJS = string(data)
+			}
+			if stylePath := viper.GetString("custom-style-css"); stylePath != "" {
+				data, err := os.ReadFile(stylePath)
+				if err != nil {
+					log.Fatal().Err(err).Str("path", stylePath).Msg("failed reading file")
+				}
+				web.StyleCSS = string(data)
+			}
 			switch {
 			case viper.GetBool("print-access-html"):
 				fmt.Println(web.AccessHTML)
@@ -54,6 +133,7 @@ func NewServerCmd() *cobra.Command {
 				fmt.Println(web.StyleCSS)
 				return
 			}
+			startWeylusServer()
 		},
 	}
 	serverCmd.Flags().BoolP("auto-start", "", false, "Start Weylus server immediately on program start.")

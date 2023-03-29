@@ -59,7 +59,7 @@ to quickly create a Cobra application.`,
 	if err := viper.BindPFlag("websocket-port", rootCmd.PersistentFlags().Lookup("websocket-port")); err != nil {
 		log.Fatal().Err(err).Msg("failed binding flag websocket-port")
 	}
-	if err := viper.BindPFlag("access-code", rootCmd.Flags().Lookup("access-code")); err != nil {
+	if err := viper.BindPFlag("access-code", rootCmd.PersistentFlags().Lookup("access-code")); err != nil {
 		log.Fatal().Err(err).Msg("failed binding flag access-code")
 	}
 
