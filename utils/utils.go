@@ -19,6 +19,9 @@
 package utils
 
 import (
+	"bufio"
+	"io"
+
 	"github.com/samber/lo"
 )
 
@@ -26,4 +29,9 @@ func Remove[V any](collection []V, index int) []V {
 	return lo.Filter(collection, func(_ V, i int) bool {
 		return i != index
 	})
+}
+
+func NewBufPipe() *bufio.ReadWriter {
+	pr, pw := io.Pipe()
+	return bufio.NewReadWriter(bufio.NewReader(pr), bufio.NewWriter(pw))
 }

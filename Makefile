@@ -1,7 +1,14 @@
-build:
+
+typescript:
+	tsc
+generate:
+	go generate
+build: generate
 	go build github.com/OmegaRogue/weylus-desktop
-run:
-	go run github.com/OmegaRogue/weylus-desktop
+run-client:
+	go run github.com/OmegaRogue/weylus-desktop client
+run-server: generate
+	go run github.com/OmegaRogue/weylus-desktop server
 lint:
 	golangci-lint run --color always
 test-ffmpeg-rtmp:

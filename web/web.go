@@ -16,20 +16,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+//go:generate tsc
 package web
 
-import (
-	_ "embed"
-)
+import _ "embed"
 
-//go:embed index.gohtml
+//go:embed templates/index.gohtml
 var IndexHTML string
 
-//go:embed access.html
+//go:embed static/access_code.html
 var AccessHTML string
 
-//go:embed lib.js
+//go:embed static/lib.js
 var LibJS string
 
-//go:embed style.css
+//go:embed static/style.css
 var StyleCSS string
