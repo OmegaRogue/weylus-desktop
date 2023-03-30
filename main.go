@@ -20,31 +20,11 @@
 package main
 
 import (
-	stdlog "log"
-	"os"
-
 	"github.com/OmegaRogue/weylus-desktop/cmd"
-	"github.com/OmegaRogue/weylus-desktop/logger/gliblogger"
-	"github.com/OmegaRogue/weylus-desktop/logger/journald"
-	"github.com/diamondburned/gotk4/pkg/glib/v2"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/rs/zerolog/pkgerrors"
+	"github.com/OmegaRogue/weylus-desktop/internal/logger"
 )
 
 func main() {
-	consoleWriter := zerolog.ConsoleWriter{
-		Out:           os.Stderr,
-		FieldsExclude: []string{journald.ThreadFieldName, gliblogger.GlibLevelFieldName},
-	}
-	multi := zerolog.MultiLevelWriter(consoleWriter, journald.NewBetterJournaldWriter())
-	log.Logger = log.Output(multi).With().Caller().Logger().Hook(journald.ThreadHook{})
-	stdLogger := log.With().Str("component", "stdlog").Logger()
-	stdlog.SetOutput(stdLogger)
-	glibLog := log.With().Str("component", "glib").Logger()
-	glib.LogSetWriter(gliblogger.LoggerHandler(glibLog))
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-
+	logger.SetupLogger()
 	cmd.Execute()
 }
