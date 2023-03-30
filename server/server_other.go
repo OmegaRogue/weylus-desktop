@@ -16,3 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+//go:build !(linux || windows)
+
+package server
+
+func getBaseConfig() data {
+	return data{
+		UInputEnabled:        false,
+		CaptureCursorEnabled: true,
+	}
+}

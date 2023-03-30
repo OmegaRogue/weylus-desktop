@@ -16,3 +16,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+package server
+
+func getBaseConfig() data {
+	return data{
+		UInputEnabled:        true,
+		CaptureCursorEnabled: true,
+	}
+}
