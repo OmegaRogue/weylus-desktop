@@ -5,6 +5,7 @@
 [![Go Report Card][4]][5]
 [![GitHub license][6]][7]
 ![Please theme this app][8]
+![GitHub][10]
 
 Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
 
@@ -33,3 +34,5 @@ Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
 [8]: https://img.shields.io/badge/Please%20theme-this-brightgreen
 
 [9]: http://example.com
+
+[10]: https://img.shields.io/github/license/OmegaRogue/weylus-desktop

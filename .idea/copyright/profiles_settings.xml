@@ -1,7 +1,7 @@
 <component name="CopyrightManager">
-  <settings default="GPL-3.0">
+  <settings>
     <module2copyright>
-      <element module="Project Files" copyright="GPL-3.0" />
+      <element module="Project Files" copyright="AGPL-3.0" />
     </module2copyright>
     <LanguageOptions name="CSS">
       <option name="fileTypeOverride" value="1" />
