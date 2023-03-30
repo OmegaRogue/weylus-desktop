@@ -8,6 +8,14 @@
 
 Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
 
+## Attribution
+
+- [logger/journald/journald.go](logger/journald/journald.go) based
+  on [zerolog](https://github.com/rs/zerolog/blob/master/journald/journald.go)
+- [logger/gliblogger/glib_logger.go](logger/gliblogger/glib_logger.go) based
+  on [gotk4](https://github.com/diamondburned/gotk4/blob/4/pkg/glib/v2/gmessages.go)
+- assets in /web and commandline options in /server based on [Weylus](https://github.com/H-M-H/Weylus)
+
 [1]: https://img.shields.io/badge/godoc-reference-blue.svg
 
 [2]: https://pkg.go.dev/github.com/OmegaRogue/weylus-desktop

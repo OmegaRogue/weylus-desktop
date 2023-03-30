@@ -32,6 +32,10 @@ var (
 	rootCmd = NewRootCmd()
 )
 
+func GetRootCmd() *cobra.Command {
+	return rootCmd
+}
+
 // NewRootCmd returns a new command which
 // represents the base command when called without any subcommands
 // TODO add description
