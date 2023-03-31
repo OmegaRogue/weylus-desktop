@@ -33,6 +33,45 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type GstElement struct {
+	native *C.GstElement
+}
+
+func (e *GstElement) Native() *C.GstElement {
+	return e.native
+}
+func NewGstElement(factoryName, name string) *GstElement {
+	elem := new(GstElement)
+	var _factoryName *C.char
+	var _name *C.char
+
+	_factoryName = (*C.char)(unsafe.Pointer(C.CString(factoryName)))
+	_name = (*C.char)(unsafe.Pointer(C.CString(name)))
+	elem.native = C.gst_element_factory_make(_factoryName, _name)
+	return elem
+}
+
+type GstPipeline struct {
+	native *C.GstElement
+}
+
+func (p *GstPipeline) Native() *C.GstElement {
+	return p.native
+}
+
+func NewGstPipeline(name string) *GstPipeline {
+	pipe := new(GstPipeline)
+
+	_name := (*C.char)(unsafe.Pointer(C.CString(name)))
+	ptr := C.gstreamer_pipeline_new(_name)
+	pipe.native = ptr
+	return pipe
+}
+
+func (p *GstPipeline) Add(elem GstElementer) {
+	C.gstreamer_bin_add(p.native, elem.Native())
+}
+
 func main() {
 	app := gtk.NewApplication("com.github.diamondburned.gotk4-examples.gtk4.simple", gio.ApplicationFlagsNone)
 	app.ConnectActivate(func() { activate(app) })

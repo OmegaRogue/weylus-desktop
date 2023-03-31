@@ -26,13 +26,6 @@ import (
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 )
 
-type GstPipeline struct {
-	native *C.GstElement
-}
-
-func (p *GstPipeline) Native() *C.GstElement {
-	return p.native
-}
 func (p *GstPipeline) Object() *glib.Object {
 	return coreglib.AssumeOwnership(unsafe.Pointer(p.native))
 }
@@ -57,18 +50,6 @@ func (p *GstPipeline) LinkMany(elems ...GstElementer) error {
 	return elementLinkMany(append([]GstElementer{p}, elems...)...)
 }
 
-func NewGstPipeline(name string) *GstPipeline {
-	pipe := new(GstPipeline)
-
-	_name := (*C.char)(unsafe.Pointer(C.CString(name)))
-	ptr := C.gstreamer_pipeline_new(_name)
-	pipe.native = ptr
-	return pipe
-}
-
-func (p *GstPipeline) Add(elem GstElementer) {
-	C.gstreamer_bin_add(p.native, elem.Native())
-}
 func (p *GstPipeline) AddMany(elems ...GstElementer) {
 	for _, elem := range elems {
 		p.Add(elem)

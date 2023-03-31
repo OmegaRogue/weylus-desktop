@@ -27,13 +27,6 @@ import (
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 )
 
-type GstElement struct {
-	native *C.GstElement
-}
-
-func (e *GstElement) Native() *C.GstElement {
-	return e.native
-}
 func (e *GstElement) Object() *glib.Object {
 	return coreglib.AssumeOwnership(unsafe.Pointer(e.native))
 }
@@ -60,15 +53,4 @@ func (e *GstElement) LinkMany(elems ...GstElementer) error {
 
 func (e *GstElement) PropertyPaintable() gdk.Paintabler {
 	return coreglib.NewValue(e.Property("paintable")).Object().Cast().(gdk.Paintabler)
-}
-
-func NewGstElement(factoryName, name string) *GstElement {
-	elem := new(GstElement)
-	var _factoryName *C.char
-	var _name *C.char
-
-	_factoryName = (*C.char)(unsafe.Pointer(C.CString(factoryName)))
-	_name = (*C.char)(unsafe.Pointer(C.CString(name)))
-	elem.native = C.gst_element_factory_make(_factoryName, _name)
-	return elem
 }
