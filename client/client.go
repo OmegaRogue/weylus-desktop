@@ -1,19 +1,19 @@
 /*
  * Copyright © 2023 omegarogue
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package client
 
@@ -38,15 +38,17 @@ var WebsocketNotStartedError = errors.New("Websocket not initialized")
 
 type Callback func(msg Msg)
 type WeylusClient struct {
-	ws            *websocket.Conn
-	msgs          chan Msg
-	callbacks     map[protocol.WeylusResponse][]Callback
-	callbackMutex sync.Mutex
-	ctx           context.Context
-	cancel        context.CancelFunc
-	Framerate     uint
-	frameTimer    *time.Ticker
-	BufPipe       *bufio.ReadWriter
+	ws                    *websocket.Conn
+	msgs                  chan Msg
+	callbacks             map[protocol.WeylusResponse][]Callback
+	callbackMutex         sync.Mutex
+	ctx                   context.Context
+	cancel                context.CancelFunc
+	Framerate             uint
+	frameTimer            *time.Ticker
+	BufPipe               *bufio.ReadWriter
+	receivedVideoResponse bool
+	requestedFirstFrame   bool
 }
 
 func (w *WeylusClient) AddCallback(event protocol.WeylusResponse, callback Callback) int {
@@ -93,7 +95,6 @@ func commandWithReceive[T protocol.MessageInbound, V protocol.MessageOutboundCon
 	var wg sync.WaitGroup
 	wg.Add(1)
 	w.AddCallbackNext(protocol.ResponseFromOutboundContent(command), func(msg Msg) {
-		log.Ctx(w.ctx).Info().Msg("callback")
 		var r any
 		r, err = protocol.ParseMessage(msg.Data)
 		if b, ok := r.(T); ok {
@@ -122,6 +123,22 @@ func (w *WeylusClient) Config(config protocol.Config) (protocol.WeylusResponse, 
 		return protocol.WeylusResponseError, errors.Wrap(err, "error on receive")
 	}
 	return protocol.ParseWeylusResponse(resp)
+}
+
+func (w *WeylusClient) StartVideo() error {
+	var wg sync.WaitGroup
+	w.requestedFirstFrame = true
+	wg.Add(1)
+	w.AddCallbackNext(protocol.WeylusResponseNewVideo, func(msg Msg) {
+		w.receivedVideoResponse = true
+		log.Ctx(w.ctx).Info().Msg("video")
+		wg.Done()
+	})
+	err := w.TryGetFrame()
+	if err != nil {
+		return errors.Wrap(err, "start video")
+	}
+	return nil
 }
 
 func (w *WeylusClient) TryGetFrame() error {
@@ -238,6 +255,9 @@ func (w *WeylusClient) Run() {
 }
 
 func (w *WeylusClient) RunVideo() {
+	w.receivedVideoResponse = false
+	w.requestedFirstFrame = false
+	time.Sleep(time.Second * 2)
 	for {
 		select {
 		case <-w.ctx.Done():
@@ -245,6 +265,15 @@ func (w *WeylusClient) RunVideo() {
 			log.Ctx(w.ctx).Err(errors.Wrap(w.ctx.Err(), "closed context")).Msg("closed context")
 			return
 		case <-w.frameTimer.C:
+			if !w.requestedFirstFrame {
+				if err := w.StartVideo(); err != nil {
+					log.Ctx(w.ctx).Err(err).Msg("send TryGetFrame for first frame, dropped frame")
+				}
+				log.Ctx(w.ctx).Trace().Msg("tick")
+				continue
+			} else if !w.receivedVideoResponse {
+				continue
+			}
 			if err := w.TryGetFrame(); err != nil {
 				log.Ctx(w.ctx).Err(err).Msg("send TryGetFrame, dropped frame")
 			}

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="ProjectResources">
     <resource url="cambalache-project.dtd" location="$USER_HOME$/cambalanche-project.dtd" />
   </component>

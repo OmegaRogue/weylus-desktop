@@ -1,0 +1,74 @@
+/*
+ * Copyright © 2023 omegarogue
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package main
+
+import "C"
+import (
+	"unsafe"
+
+	coreglib "github.com/diamondburned/gotk4/pkg/core/glib"
+	"github.com/diamondburned/gotk4/pkg/gdk/v4"
+	"github.com/diamondburned/gotk4/pkg/glib/v2"
+)
+
+type GstElement struct {
+	native *C.GstElement
+}
+
+func (e *GstElement) Native() *C.GstElement {
+	return e.native
+}
+func (e *GstElement) Object() *glib.Object {
+	return coreglib.AssumeOwnership(unsafe.Pointer(e.native))
+}
+
+func (e *GstElement) Link(elem GstElementer) error {
+	return elementLink(e, elem)
+}
+
+func (e *GstElement) SetProperty(name string, value any) {
+	elementSetProperty(e, name, value)
+}
+
+func (e *GstElement) Property(name string) any {
+	return elementProperty(e, name)
+}
+
+func (e *GstElement) SetState(state GstState) (GstStateChangeReturn, error) {
+	return elementSetState(e, state)
+}
+
+func (e *GstElement) LinkMany(elems ...GstElementer) error {
+	return elementLinkMany(append([]GstElementer{e}, elems...)...)
+}
+
+func (e *GstElement) PropertyPaintable() gdk.Paintabler {
+	return coreglib.NewValue(e.Property("paintable")).Object().Cast().(gdk.Paintabler)
+}
+
+func NewGstElement(factoryName, name string) *GstElement {
+	elem := new(GstElement)
+	var _factoryName *C.char
+	var _name *C.char
+
+	_factoryName = (*C.char)(unsafe.Pointer(C.CString(factoryName)))
+	_name = (*C.char)(unsafe.Pointer(C.CString(name)))
+	elem.native = C.gst_element_factory_make(_factoryName, _name)
+	return elem
+}

@@ -1,19 +1,19 @@
 /*
  * Copyright © 2023 omegarogue
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * any later version.
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package cmd
@@ -42,6 +42,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gdk/v4"
 	"github.com/diamondburned/gotk4/pkg/gio/v2"
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
+	// coreglib "github.com/diamondburned/gotk4/pkg/core/glib"
 	"github.com/diamondburned/gotk4/pkg/gtk/v4"
 	"github.com/edsrzf/mmap-go"
 	"github.com/pkg/errors"
@@ -125,11 +126,11 @@ func activate(app *gtk.Application) {
 	scrollLabel.SetHAlign(gtk.AlignStart)
 
 	layout := gtk.NewGrid()
-	layout.Attach(stylusLabel, 0, 0, 1, 1)
-	layout.Attach(clickLabel, 0, 1, 1, 1)
-	layout.Attach(touchLabel, 0, 2, 1, 1)
-	layout.Attach(keyLabel, 0, 3, 1, 1)
-	layout.Attach(scrollLabel, 0, 4, 1, 1)
+	//layout.Attach(stylusLabel, 0, 0, 1, 1)
+	//layout.Attach(clickLabel, 0, 1, 1, 1)
+	//layout.Attach(touchLabel, 0, 2, 1, 1)
+	//layout.Attach(keyLabel, 0, 3, 1, 1)
+	//layout.Attach(scrollLabel, 0, 4, 1, 1)
 
 	manager := event.NewControllerManager()
 	manager.AddCallback(func(m *event.ControllerManager) {
@@ -186,7 +187,7 @@ func activate(app *gtk.Application) {
 		err := sh(ctx, fmt.Sprintf(`
 			ffmpeg -y \
 				-hide_banner -loglevel error \
-				-f mp4 -re -i - \
+				-hwaccel cuda -c:v h264_cuvid -f mp4 -re -i - \
 				-c:v bmp -pix_fmt rgba -update 1 -atomic_writing 1 %s/screen.bmp
 		`, tmpdir), weylusClient.BufPipe)
 		// err := sh(ctx, fmt.Sprintf(`
@@ -235,7 +236,10 @@ func activate(app *gtk.Application) {
 	screen.SetKeepAspectRatio(true)
 	screen.SetHExpand(true)
 	screen.AddTickCallback(func(_ gtk.Widgetter, clock gdk.FrameClocker) bool {
-		bmpr.acquire(func(txt *gdk.MemoryTexture) { screen.SetPaintable(txt) })
+		bmpr.acquire(func(txt *gdk.MemoryTexture) {
+			screen.SetSizeRequest(txt.Width(), txt.Height())
+			screen.SetPaintable(txt)
+		})
 		return true
 	})
 
@@ -244,7 +248,7 @@ func activate(app *gtk.Application) {
 		return ctx.Err() == nil
 	})
 
-	layout.Attach(screen, 0, 5, 1, 1)
+	layout.Attach(screen, 0, 0, 1, 1)
 
 	address := url.URL{
 		Scheme: "ws",
@@ -267,7 +271,7 @@ func activate(app *gtk.Application) {
 
 	if _, err := weylusClient.Config(protocol.Config{
 		UInputSupport: true,
-		CapturableID:  1,
+		CapturableID:  0,
 		CaptureCursor: true,
 		MaxWidth:      5120 / 2,
 		MaxHeight:     1440,
