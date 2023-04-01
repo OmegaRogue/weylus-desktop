@@ -25,15 +25,16 @@ jobs:
         with:
           packages: libunwind-dev libgstreamer1.0-dev libgtk-4-dev libsystemd-dev libgstreamer-plugins-base1.0-dev
           version: 0.0.0.3
-      - run: ls -lha; pwd
+      - run: ls -lha; pwd; env
+      - run: go install github.com/abice/go-enum@latest
       - name: Generate
         run: go generate -v ./...
       - name: Build
         run: go build -v ./...
-      - run: ls -lha; pwd
+      - run: ls -lha; pwd; env
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
           args: --timeout=60m --verbose --modules-download-mode readonly
-      - run: ls -lha; pwd
+      - run: ls -lha; pwd; env
 #          only-new-issues: true

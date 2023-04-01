@@ -20,6 +20,7 @@ jobs:
         with:
           packages: libunwind-dev libgstreamer1.0-dev libgtk-4-dev libsystemd-dev libgstreamer-plugins-base1.0-dev
           version: 0.0.0.3
+      - run: go install github.com/abice/go-enum@latest
       - name: Generate
         run: go generate -v ./...
       - name: Build
