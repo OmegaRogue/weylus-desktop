@@ -20,10 +20,9 @@
 
 #include "go_gstreamer.h"
 #include <stdio.h>
-
 #include <stdlib.h>
-#include <glib-object.h>
-#include <gtk/gtk.h>
+
+
 
 
 //static void shutdown (){
@@ -35,17 +34,66 @@
 //}
 
 
+GstCaps *gstreamer_caps_example() {
+    return gst_caps_new_simple("video/x-raw",
+                               "framerate", GST_TYPE_FRACTION, 30, 1,
+                               "pixel-aspect-ratio", GST_TYPE_FRACTION, 1, 1,
+                               "width", G_TYPE_INT, 1280,
+                               "height", G_TYPE_INT, 720,
+                               NULL);
+}
+
+void gstreamer_set_caps(GstElement *element, GstCaps *caps) {
+    g_object_set(element, "caps", caps, NULL);
+}
+
+
+void gstreamer_set_caps_example(GstElement *element) {
+    GstCaps *caps = gst_caps_new_simple("video/x-raw",
+                                                   "framerate", GST_TYPE_FRACTION, 30, 1,
+                                                   "pixel-aspect-ratio", GST_TYPE_FRACTION, 1, 1,
+                                                   "width", G_TYPE_INT, 1280,
+                                                   "height", G_TYPE_INT, 720,
+                                                   NULL);
+    g_object_set(element, "caps", caps, NULL);
+}
+
+
+GstAppSrc *gstreamer_app_src_cast(GstElement *appsrc) {
+    return GST_APP_SRC(appsrc);
+}
+
+int gstreamer_app_src_end_of_stream(GstElement *appsrc) {
+    return gst_app_src_end_of_stream(GST_APP_SRC(appsrc));
+}
+
+GstBuffer *gstreamer_new_buffer(size_t size) {
+    return gst_buffer_new_and_alloc(size);
+}
+
+size_t gstreamer_buffer_fill(GstBuffer *buffer, size_t offset, const void *data, size_t size) {
+    return gst_buffer_fill(buffer, offset, data, size);
+}
+
+int gstreamer_signal_emit_by_name(GstElement *appsrc, const char *name) {
+    GstFlowReturn ret;
+    g_signal_emit_by_name(appsrc, name, &ret);
+    return ret;
+}
+
 void gstreamer_init() {
-    gst_init (NULL, NULL);
+    gst_init(NULL, NULL);
 }
 
 bool gstreamer_bin_add(GstElement *bin, GstElement *elem) {
     return gst_bin_add(GST_BIN(bin), elem);
 }
+
 int gstreamer_element_set_state(GstElement *element, int state) {
     return gst_element_set_state(element, state);
 }
-GstElement *gstreamer_pipeline_new (const char *name) {
+
+GstElement *gstreamer_pipeline_new(const char *name) {
     return gst_pipeline_new(name);
 }
 

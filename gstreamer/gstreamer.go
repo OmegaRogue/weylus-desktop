@@ -23,6 +23,7 @@ package main
 import "C"
 
 import (
+	"io"
 	"os"
 	"unsafe"
 
@@ -71,6 +72,55 @@ func NewGstPipeline(name string) *GstPipeline {
 func (p *GstPipeline) Add(elem GstElementer) {
 	C.gstreamer_bin_add(p.native, elem.Native())
 }
+
+type GstBuffer struct {
+	native *C.GstBuffer
+}
+
+func NewGstBuffer(size int) *GstBuffer {
+	buffer := new(GstBuffer)
+	_size := C.size_t(size)
+	buffer.native = C.gstreamer_new_buffer(_size)
+
+	return buffer
+}
+
+func (b *GstBuffer) Fill(data []byte, offset int) int {
+	_offset := C.size_t(offset)
+	_size := C.size_t(len(data))
+	return int(C.gstreamer_buffer_fill(b.native, _offset, C.CBytes(data), _size))
+}
+
+func (e *GstElement) AppSrcPushBuffer(b *GstBuffer) int {
+	return int(C.gst_app_src_push_buffer(C.gstreamer_app_src_cast(e.native), b.native))
+}
+
+type AppSrcWriter struct {
+	elem *GstElement
+}
+
+func NewAppSrcWriter(appsrc *GstElement) *AppSrcWriter {
+	w := new(AppSrcWriter)
+	w.elem = appsrc
+
+	return w
+}
+
+func (a *AppSrcWriter) Close() error {
+	C.gst_app_src_end_of_stream(C.gstreamer_app_src_cast(a.elem.native))
+	return nil
+}
+
+func (a *AppSrcWriter) Write(p []byte) (n int, err error) {
+	buf := NewGstBuffer(len(p))
+	n = buf.Fill(p, 0)
+
+	a.elem.AppSrcPushBuffer(buf)
+	C.free(unsafe.Pointer(buf.native))
+	return
+}
+
+var _ io.WriteCloser = &AppSrcWriter{}
 
 func main() {
 	app := gtk.NewApplication("com.github.diamondburned.gotk4-examples.gtk4.simple", gio.ApplicationFlagsNone)
@@ -142,24 +192,30 @@ func activate(app *gtk.Application) {
 	window.SetTitle("gotk4 Example")
 	window.SetDefaultSize(400, 300)
 
-	source := NewGstElement("videotestsrc", "source")
-	convert := NewGstElement("videoconvert", "convert")
-	sink := NewGstElement("gtk4paintablesink", "sink")
+	source := NewGstElement("v4l2src", "source")
+	capsfilter := NewGstElement("capsfilter", "filter")
+
+	//source.SetProperty("device", "/dev/video0")
+
+	C.gstreamer_set_caps_example(capsfilter.native)
+
+	convert := NewVideoConvert("convert")
+	sink := NewGTK4PaintableSink("sink")
 
 	picture := gtk.NewPicture()
 	picture.SetPaintable(sink.PropertyPaintable())
 
 	pipeline := NewGstPipeline("test-pipeline")
 
-	pipeline.AddMany(source, convert, sink)
+	pipeline.AddMany(source, capsfilter, convert, sink)
 
-	if err := source.LinkMany(convert, sink); err != nil {
+	if err := source.LinkMany(capsfilter, convert, sink); err != nil {
 		C.gst_object_unref(C.gpointer(unsafe.Pointer(pipeline.native)))
 		C.free(unsafe.Pointer(pipeline.native))
 		log.Fatal().Err(err).Msg("Elements could not be linked.")
 	}
 
-	source.SetProperty("pattern", 0)
+	//source.SetProperty("pattern", 0)
 
 	if _, err := pipeline.SetState(GstStatePlaying); err != nil {
 		C.gst_object_unref(C.gpointer(unsafe.Pointer(pipeline.native)))

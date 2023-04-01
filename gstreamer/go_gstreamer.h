@@ -22,6 +22,8 @@
 
 #include <gst/gst.h>
 #include <gtk/gtk.h>
+#include <gst/app/gstappsrc.h>
+#include <glib-object.h>
 
 
 //GstBus *bus;
@@ -33,3 +35,11 @@ void gstreamer_init();
 bool gstreamer_bin_add(GstElement *bin, GstElement *elem);
 GstElement *gstreamer_pipeline_new (const char *name);
 int gstreamer_element_set_state(GstElement *element, int state);
+int gstreamer_signal_emit_by_name(GstElement *appsrc, const char *name);
+int gstreamer_app_src_end_of_stream(GstElement *appsrc);
+GstAppSrc *gstreamer_app_src_cast(GstElement *appsrc);
+GstBuffer *gstreamer_new_buffer(size_t size);
+size_t gstreamer_buffer_fill(GstBuffer *buffer, size_t offset, const void* data, size_t size);
+GstCaps *gstreamer_caps_example();
+void gstreamer_set_caps(GstElement *element, GstCaps *caps);
+void gstreamer_set_caps_example(GstElement *element);

@@ -54,3 +54,16 @@ func (e *GstElement) LinkMany(elems ...GstElementer) error {
 func (e *GstElement) PropertyPaintable() gdk.Paintabler {
 	return coreglib.NewValue(e.Property("paintable")).Object().Cast().(gdk.Paintabler)
 }
+
+func NewAppSource(name string) *GstElement {
+	return NewGstElement("appsrc", name)
+}
+func NewVideoConvert(name string) *GstElement {
+	return NewGstElement("videoconvert", name)
+}
+func NewGTK4PaintableSink(name string) *GstElement {
+	return NewGstElement("gtk4paintablesink", name)
+}
+func NewVideoTestSource(name string) *GstElement {
+	return NewGstElement("videotestsrc", name)
+}

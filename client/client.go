@@ -36,10 +36,10 @@ import (
 
 var WebsocketNotStartedError = errors.New("Websocket not initialized")
 
-type Callback func(msg Msg)
+type Callback func(msg utils.Msg)
 type WeylusClient struct {
 	ws                    *websocket.Conn
-	msgs                  chan Msg
+	msgs                  chan utils.Msg
 	callbacks             map[protocol.WeylusResponse][]Callback
 	callbackMutex         sync.Mutex
 	ctx                   context.Context
@@ -69,7 +69,7 @@ func (w *WeylusClient) RemoveCallback(event protocol.WeylusResponse, i int) int 
 
 func (w *WeylusClient) AddCallbackNext(event protocol.WeylusResponse, callback Callback) {
 	var i int
-	i = w.AddCallback(event, func(msg Msg) {
+	i = w.AddCallback(event, func(msg utils.Msg) {
 		defer w.RemoveCallback(event, i)
 		callback(msg)
 	})
@@ -77,7 +77,7 @@ func (w *WeylusClient) AddCallbackNext(event protocol.WeylusResponse, callback C
 
 func NewWeylusClient(ctx context.Context, fps uint) *WeylusClient {
 	w := new(WeylusClient)
-	w.msgs = make(chan Msg)
+	w.msgs = make(chan utils.Msg)
 	w.callbacks = make(map[protocol.WeylusResponse][]Callback)
 	ctx = log.With().Str("component", "client").Logger().WithContext(ctx)
 	w.ctx, w.cancel = context.WithCancel(ctx)
@@ -94,7 +94,7 @@ func commandWithReceive[T protocol.MessageInbound, V protocol.MessageOutboundCon
 	}
 	var wg sync.WaitGroup
 	wg.Add(1)
-	w.AddCallbackNext(protocol.ResponseFromOutboundContent(command), func(msg Msg) {
+	w.AddCallbackNext(protocol.ResponseFromOutboundContent(command), func(msg utils.Msg) {
 		var r any
 		r, err = protocol.ParseMessage(msg.Data)
 		if b, ok := r.(T); ok {
@@ -129,7 +129,7 @@ func (w *WeylusClient) StartVideo() error {
 	var wg sync.WaitGroup
 	w.requestedFirstFrame = true
 	wg.Add(1)
-	w.AddCallbackNext(protocol.WeylusResponseNewVideo, func(msg Msg) {
+	w.AddCallbackNext(protocol.WeylusResponseNewVideo, func(msg utils.Msg) {
 		w.receivedVideoResponse = true
 		log.Ctx(w.ctx).Info().Msg("video")
 		wg.Done()
@@ -188,11 +188,6 @@ func (w *WeylusClient) Dial(address string) error {
 	return nil
 }
 
-type Msg struct {
-	Type websocket.MessageType
-	Data []byte
-}
-
 func (w *WeylusClient) Listen() {
 	if w.ws == nil {
 		log.Fatal().Msg("Listen failed")
@@ -209,7 +204,7 @@ func (w *WeylusClient) Listen() {
 				log.Ctx(w.ctx).Fatal().Err(err).Msg("error on listen")
 				return
 			}
-			w.msgs <- Msg{
+			w.msgs <- utils.Msg{
 				Type: t,
 				Data: d,
 			}
