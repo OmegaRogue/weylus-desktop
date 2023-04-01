@@ -11,6 +11,8 @@ on:
   pull_request:
 permissions:
   contents: read
+env:
+  GO111MODULE: on
 jobs:
   golangci:
     name: lint
