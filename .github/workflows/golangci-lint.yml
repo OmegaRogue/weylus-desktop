@@ -9,6 +9,8 @@ on:
       - master
       - main
   pull_request:
+permissions:
+  contents: read
 jobs:
   golangci:
     name: lint
@@ -23,8 +25,13 @@ jobs:
         with:
           packages: libunwind-dev libgstreamer1.0-dev libgtk-4-dev libsystemd-dev libgstreamer-plugins-base1.0-dev
           version: 0.0.0.3
+      - run: ls -lha; pwd
+      - name: Build
+        run: go build -v ./...
+      - run: ls -lha; pwd
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          args: --timeout=60m --verbose
+          args: --timeout=60m --verbose --modules-download-mode readonly
+      - run: ls -lha; pwd
 #          only-new-issues: true
