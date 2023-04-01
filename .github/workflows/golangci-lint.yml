@@ -25,5 +25,6 @@ jobs:
           version: 0.0.0.1
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
-#        with:
+        with:
+          args: --timeout=3m
 #          only-new-issues: true
