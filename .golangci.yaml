@@ -92,7 +92,19 @@ issues:
       text: "`v4` redeclared in this block"
     - linters:
         - typecheck
+      text: "`v2` redeclared in this block"
+    - linters:
+        - typecheck
+      text: "other declaration of v4"
+    - linters:
+        - typecheck
+      text: "other declaration of v2"
+    - linters:
+        - typecheck
       text: "undefined: glib"
+    - linters:
+        - typecheck
+      text: "undefined: gio"
     - linters:
         - typecheck
       text: "pattern static/lib.js: no matching files found"
