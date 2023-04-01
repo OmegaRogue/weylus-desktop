@@ -21,10 +21,10 @@ jobs:
       - run: sudo apt-get update
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: libunwind-dev libgstreamer1.0-dev libgtk-4-dev
-          version: 0.0.0.2
+          packages: libunwind-dev libgstreamer1.0-dev libgtk-4-dev libsystemd-dev libgstreamer-plugins-base1.0-dev
+          version: 0.0.0.3
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          args: --timeout=60m
+          args: --timeout=60m -mod=readonly
 #          only-new-issues: true
