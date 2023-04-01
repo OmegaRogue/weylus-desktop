@@ -18,10 +18,11 @@ jobs:
         with:
           go-version: ^1.20.2
       - uses: actions/checkout@v3
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-gl gstreamer1.0-gtk3 libgtk-4-dev
-          version: 0.0.0
+      - run: sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-gl gstreamer1.0-gtk3 libgtk-4-dev
+      #      - uses: awalsh128/cache-apt-pkgs-action@latest
+      #        with:
+      #          packages: libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-gl gstreamer1.0-gtk3 libgtk-4-dev
+      #          version: 0.0.0
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
