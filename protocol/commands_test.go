@@ -82,7 +82,7 @@ func TestCommandFromOutboundContent(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				res1, err := CommandFromOutboundContent(underlyingString(v))
+				res1, err := CommandFromOutboundContent(underlyingString(string(v)))
 				if err != nil {
 					t.Error(err)
 				}
