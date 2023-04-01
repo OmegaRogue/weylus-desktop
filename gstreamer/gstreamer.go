@@ -9,11 +9,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package main
@@ -129,14 +129,7 @@ func main() {
 	if code := app.Run(os.Args); code > 0 {
 		os.Exit(code)
 	}
-
 }
-
-//func GetGtk4Gstreamer() gdk.Paintabler {
-//	ptr := C.initialize()
-//	obj := coreglib.AssumeOwnership(unsafe.Pointer(ptr))
-//	return obj.Cast().(gdk.Paintabler)
-//}
 
 type GstElementer interface {
 	Object() *glib.Object
@@ -195,7 +188,7 @@ func activate(app *gtk.Application) {
 	source := NewGstElement("v4l2src", "source")
 	capsfilter := NewGstElement("capsfilter", "filter")
 
-	//source.SetProperty("device", "/dev/video0")
+	// source.SetProperty("device", "/dev/video0")
 
 	C.gstreamer_set_caps_example(capsfilter.native)
 
@@ -215,7 +208,7 @@ func activate(app *gtk.Application) {
 		log.Fatal().Err(err).Msg("Elements could not be linked.")
 	}
 
-	//source.SetProperty("pattern", 0)
+	// source.SetProperty("pattern", 0)
 
 	if _, err := pipeline.SetState(GstStatePlaying); err != nil {
 		C.gst_object_unref(C.gpointer(unsafe.Pointer(pipeline.native)))

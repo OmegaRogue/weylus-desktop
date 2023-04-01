@@ -9,11 +9,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package server
@@ -184,25 +184,26 @@ func handleWebsite(websocketPort uint16) func(w http.ResponseWriter, r *http.Req
 		d := getBaseConfig()
 		d.WebsocketPort = websocketPort
 
-		//authed := false
-		//if accessCode := viper.GetString("access-code"); accessCode != "" {
-		//	if code := r.URL.Query().Get("access_code"); code != "" {
-		//		d.AccessCode = code
-		//		authed = true
-		//		hlog.FromRequest(r).Debug().Msg("web client authenticated")
-		//	}
-		//} else {
-		//	authed = true
-		//}
+		// TODO add authentication
+		// authed := false
+		// if accessCode := viper.GetString("access-code"); accessCode != "" {
+		// 	if code := r.URL.Query().Get("access_code"); code != "" {
+		// 		d.AccessCode = code
+		// 		authed = true
+		// 		hlog.FromRequest(r).Debug().Msg("web client authenticated")
+		// 	}
+		// } else {
+		// 	authed = true
+		// }
 		//
-		//if !authed {
-		//	w.Header().Add("Content-Type", "text/html")
-		//	if _, err := w.Write([]byte(web.AccessHTML)); err != nil {
-		//		hlog.FromRequest(r).Err(err).Msg("error on write access_code.html")
-		//		w.WriteHeader(http.StatusInternalServerError)
-		//	}
-		//	return
-		//}
+		// if !authed {
+		// 	w.Header().Add("Content-Type", "text/html")
+		// 	if _, err := w.Write([]byte(web.AccessHTML)); err != nil {
+		// 		hlog.FromRequest(r).Err(err).Msg("error on write access_code.html")
+		// 		w.WriteHeader(http.StatusInternalServerError)
+		// 	}
+		// 	return
+		// }
 
 		tmpl, err := template.New("IndexHTML").Parse(web.IndexHTML)
 		if err != nil {

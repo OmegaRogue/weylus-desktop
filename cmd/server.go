@@ -9,11 +9,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package cmd
@@ -34,7 +34,7 @@ var serverCmd = NewServerCmd()
 
 // NewServerCmd creates a new server command
 //
-//nolint:funlen
+//nolint:funlen,gocognit
 func NewServerCmd() *cobra.Command {
 	var serverCmd = &cobra.Command{
 		Use:   "server",
@@ -85,7 +85,7 @@ func NewServerCmd() *cobra.Command {
 			}
 			// TODO serverLogger := log.With().Str("component", "server").Logger()
 			// TODO server.NewWeylusServer()
-			//server.WeylusWeb(serverLogger)
+			// server.WeylusWeb(serverLogger)
 		},
 	}
 	serverCmd.Flags().BoolP("auto-start", "", false, "Start Weylus server immediately on program start.")

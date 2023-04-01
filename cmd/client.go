@@ -9,11 +9,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 package cmd
@@ -126,11 +126,11 @@ func activate(app *gtk.Application) {
 	scrollLabel.SetHAlign(gtk.AlignStart)
 
 	layout := gtk.NewGrid()
-	//layout.Attach(stylusLabel, 0, 0, 1, 1)
-	//layout.Attach(clickLabel, 0, 1, 1, 1)
-	//layout.Attach(touchLabel, 0, 2, 1, 1)
-	//layout.Attach(keyLabel, 0, 3, 1, 1)
-	//layout.Attach(scrollLabel, 0, 4, 1, 1)
+	// layout.Attach(stylusLabel, 0, 0, 1, 1)
+	// layout.Attach(clickLabel, 0, 1, 1, 1)
+	// layout.Attach(touchLabel, 0, 2, 1, 1)
+	// layout.Attach(keyLabel, 0, 3, 1, 1)
+	// layout.Attach(scrollLabel, 0, 4, 1, 1)
 
 	manager := event.NewControllerManager()
 	manager.AddCallback(func(m *event.ControllerManager) {
@@ -321,13 +321,23 @@ func (r *bmpReader) update(ctx context.Context) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to open bmp snapshot")
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Err(err).Msg("failed closing file")
+		}
+	}(f)
 
 	buf, err := mmap.Map(f, mmap.RDONLY, 0)
 	if err != nil {
 		return errors.Wrap(err, "failed to mmap bmp snapshot")
 	}
-	defer buf.Unmap()
+	defer func(buf *mmap.MMap) {
+		err := buf.Unmap()
+		if err != nil {
+			log.Err(err).Msg("failed unmapping buffer")
+		}
+	}(&buf)
 
 	// TODO: figure out double buffering to avoid locking for too long.
 	r.bmp, err = r.dec.Decode(buf, r.bmp)
