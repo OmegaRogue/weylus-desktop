@@ -19,6 +19,12 @@
 //go:generate go-enum --marshal --names --values
 package protocol
 
+import (
+	"reflect"
+
+	"github.com/pkg/errors"
+)
+
 // WeylusCommand contains the possible commands supported by weylus
 /*
 ENUM(
@@ -44,25 +50,35 @@ Error
 */
 type WeylusResponse string
 
-var CommandResponse = map[WeylusCommand]WeylusResponse{
+var commandResponse = map[WeylusCommand]WeylusResponse{
 	WeylusCommandGetCapturableList: WeylusResponseCapturableList,
 	WeylusCommandConfig:            WeylusResponseConfigOk,
+	"":                             WeylusResponseError,
 }
 
-func CommandFromOutboundContent[T MessageOutboundContent](content T) WeylusCommand {
+func CommandFromOutboundContent[T MessageOutboundContent](content T) (WeylusCommand, error) {
 	switch any(content).(type) {
 	case PointerEvent:
-		return WeylusCommandPointerEvent
+		return WeylusCommandPointerEvent, nil
 	case WheelEvent:
-		return WeylusCommandWheelEvent
+		return WeylusCommandWheelEvent, nil
 	case KeyboardEvent:
-		return WeylusCommandKeyboardEvent
+		return WeylusCommandKeyboardEvent, nil
 	case Config:
-		return WeylusCommandConfig
+		return WeylusCommandConfig, nil
+	default:
+		if b := reflect.ValueOf(content); b.Kind() == reflect.String {
+			return WeylusCommand(b.String()), nil
+		} else {
+			return "", errors.New("Invalid Outbound Content")
+		}
 	}
-	return ""
 }
 
-func ResponseFromOutboundContent[T MessageOutboundContent](content T) WeylusResponse {
-	return CommandResponse[CommandFromOutboundContent(content)]
+func ResponseFromOutboundContent[T MessageOutboundContent](content T) (WeylusResponse, error) {
+	cmd, err := CommandFromOutboundContent(content)
+	if err != nil {
+		return "", errors.Wrap(err, "Can't get Response")
+	}
+	return commandResponse[cmd], nil
 }

@@ -94,7 +94,11 @@ func commandWithReceive[T protocol.MessageInbound, V protocol.MessageOutboundCon
 	}
 	var wg sync.WaitGroup
 	wg.Add(1)
-	w.AddCallbackNext(protocol.ResponseFromOutboundContent(command), func(msg utils.Msg) {
+	resp, err := protocol.ResponseFromOutboundContent(command)
+	if err != nil {
+		return a, errors.Wrap(err, "error on ResponseFromOutboundContent")
+	}
+	w.AddCallbackNext(resp, func(msg utils.Msg) {
 		var r any
 		r, err = protocol.ParseMessage(msg.Data)
 		if b, ok := r.(T); ok {
@@ -105,7 +109,11 @@ func commandWithReceive[T protocol.MessageInbound, V protocol.MessageOutboundCon
 		wg.Done()
 	})
 	if err := wsjson.Write(w.ctx, w.ws, protocol.WrapMessage(command)); err != nil {
-		return a, errors.Wrap(err, string(protocol.CommandFromOutboundContent(command)))
+		cmd, err := protocol.CommandFromOutboundContent(command)
+		if err != nil {
+			return a, errors.Wrap(err, "error on CommandFromOutboundContent")
+		}
+		return a, errors.Wrap(err, cmd.String())
 	}
 	wg.Wait()
 	if err != nil {

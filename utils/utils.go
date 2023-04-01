@@ -21,7 +21,9 @@ package utils
 import (
 	"bufio"
 	"io"
+	"reflect"
 
+	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"nhooyr.io/websocket"
 )
@@ -40,4 +42,16 @@ func NewBufPipe() *bufio.ReadWriter {
 type Msg struct {
 	Type websocket.MessageType
 	Data []byte
+}
+
+func IsStringUnderlying(v any) bool {
+	b := reflect.ValueOf(v)
+	return b.Kind() == reflect.String
+}
+func GetUnderlyingString(v any) (string, error) {
+	if b := reflect.ValueOf(v); b.Kind() == reflect.String {
+		return b.String(), nil
+	} else {
+		return "", errors.Errorf("%v of invalid type %s", v, b.Type().String())
+	}
 }

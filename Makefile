@@ -17,3 +17,6 @@ test-ffmpeg:
 	go run github.com/OmegaRogue/weylus-desktop | ffmpeg -re -i - -listen 1 -f mp4 -fflags nobuffer -movflags frag_keyframe+empty_moov http://localhost:8080/test.mp4
 test-gstreamer:
 	go run github.com/OmegaRogue/weylus-desktop/gstreamer
+run-fuzz:
+	for t in $$(go test github.com/OmegaRogue/weylus-desktop/protocol -list=Fuzz | grep Fuzz); \
+	do (go test github.com/OmegaRogue/weylus-desktop/protocol -fuzz=$${t} -fuzztime 30s &) ; done
