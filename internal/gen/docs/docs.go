@@ -16,7 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-//go:generate go run github.com/OmegaRogue/weylus-desktop/internal/docs ../../../man ../../../docs
+//go:generate go run . ../../../man ../../../docs
 package main
 
 import (
