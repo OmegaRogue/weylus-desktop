@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Go
-        uses: actions/setup-go@v4
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v4
         with:
           go-version: ^1.20.2
       - uses: awalsh128/cache-apt-pkgs-action@latest
@@ -30,4 +30,8 @@ jobs:
       - name: Build
         run: go build -v ./...
       - name: Test
-        run: go test -v ./...
+        run: go test -coverprofile=coverage.txt -covermode=atomic -v -v ./...
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
