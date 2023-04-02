@@ -3,7 +3,7 @@ module github.com/OmegaRogue/weylus-desktop
 go 1.20
 
 require (
-	github.com/coreos/go-systemd/v22 v22.3.3-0.20220203105225-a9a7ef127534
+	github.com/coreos/go-systemd/v22 v22.5.0
 	github.com/diamondburned/gotk4/pkg v0.0.5
 	github.com/edsrzf/mmap-go v1.1.0
 	github.com/holoplot/go-evdev v0.0.0-20220721205823-d31c64b9d636
@@ -14,7 +14,6 @@ require (
 	github.com/samber/lo v1.37.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
-	github.com/viamrobotics/evdev v0.1.3
 	nhooyr.io/websocket v1.8.7
 )
 
