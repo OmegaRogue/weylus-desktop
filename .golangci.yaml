@@ -32,6 +32,20 @@ linters:
     - goheader
     - errcheck
     - revive
+    - usestdlibvars
+    - durationcheck
+    - contextcheck
+    - decorder
+    - gocheckcompilerdirectives
+    - grouper
+    - musttag
+    - prealloc
+    - paralleltest
+    - unconvert
+    - wastedassign
+    - wrapcheck
+    - nilerr
+    - nilnil
 linters-settings:
   revive:
     rules:

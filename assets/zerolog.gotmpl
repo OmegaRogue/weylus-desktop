@@ -1,0 +1,3 @@
+func (x {{.enum.Name}}) MarshalZerologObject(e *zerolog.Event) {
+e.Str("{{.enum.Name}}", fmt.Sprint(x))
+}

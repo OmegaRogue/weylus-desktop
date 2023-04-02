@@ -81,6 +81,15 @@ func NewClientCmd() *cobra.Command {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	clientCmd.Flags().StringP("hostname", "", "localhost", "Hostname to connect to")
+	clientCmd.Flags().Uint16P("websocket-port", "", 9001, "Websocket port")
+	clientCmd.Flags().StringP("access-code", "", "", "Access code")
+
+	if err := viper.BindPFlag("websocket-port", clientCmd.Flags().Lookup("websocket-port")); err != nil {
+		log.Fatal().Err(err).Msg("failed binding flag websocket-port")
+	}
+	if err := viper.BindPFlag("access-code", clientCmd.Flags().Lookup("access-code")); err != nil {
+		log.Fatal().Err(err).Msg("failed binding flag access-code")
+	}
 	if err := viper.BindPFlag("hostname", clientCmd.Flags().Lookup("hostname")); err != nil {
 		log.Fatal().Err(err).Msg("failed binding flag hostname")
 	}
@@ -305,7 +314,7 @@ func (r *bmpReader) start(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			return errors.Wrap(ctx.Err(), "context ended")
 		case <-clock.C:
 			// ok
 		}
@@ -375,7 +384,7 @@ func sh(ctx context.Context, shcmd string, reader io.Reader) error {
 	cmd.Stderr = os.Stderr
 	in, err := cmd.StdinPipe()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "create stdin pipe")
 	}
 	go func() {
 		for {
@@ -391,5 +400,10 @@ func sh(ctx context.Context, shcmd string, reader io.Reader) error {
 		}
 	}()
 
-	return cmd.Run()
+	err = cmd.Run()
+	if err != nil {
+		return errors.Wrap(err, "run shell")
+	}
+
+	return nil
 }

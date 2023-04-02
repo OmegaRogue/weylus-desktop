@@ -29,6 +29,9 @@ import (
 type UInputDevice struct {
 }
 
+// TODO implement server, #2
+//
+//nolint:unused
 func createStylus() {
 	_, err := evdev.CreateDevice(
 		"fake-device",

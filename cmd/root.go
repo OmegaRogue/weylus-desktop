@@ -42,13 +42,8 @@ func GetRootCmd() *cobra.Command {
 func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "weylus-desktop",
-		Short: "A brief description of your application",
-		Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+		Short: "weylus-desktop is a remote-desktop program for stylus/touch input and gaming.",
+		Long:  `weylus-desktop is a remote-desktop program for stylus/touch input and gaming.`,
 		//Run: func(cmd *cobra.Command, args []string) { },
 	}
 
@@ -57,15 +52,6 @@ to quickly create a Cobra application.`,
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.weylus-desktop.yaml)")
-	rootCmd.PersistentFlags().Uint16P("websocket-port", "", 9001, "Websocket port")
-	rootCmd.PersistentFlags().StringP("access-code", "", "", "Access code")
-
-	if err := viper.BindPFlag("websocket-port", rootCmd.PersistentFlags().Lookup("websocket-port")); err != nil {
-		log.Fatal().Err(err).Msg("failed binding flag websocket-port")
-	}
-	if err := viper.BindPFlag("access-code", rootCmd.PersistentFlags().Lookup("access-code")); err != nil {
-		log.Fatal().Err(err).Msg("failed binding flag access-code")
-	}
 
 	return rootCmd
 }

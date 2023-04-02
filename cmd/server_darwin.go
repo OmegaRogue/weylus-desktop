@@ -19,14 +19,9 @@
 package cmd
 
 import (
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func serverFlagsOSSpecific(cmd *cobra.Command) {
 	cmd.Flags().BoolP("try-videotoolbox", "", false, "Try to use hardware acceleration through the VideoToolbox API.")
-	if err := viper.BindPFlag("try-videotoolbox", cmd.Flags().Lookup("try-videotoolbox")); err != nil {
-		log.Fatal().Err(err).Msg("failed binding flag try-videotoolbox")
-	}
 }

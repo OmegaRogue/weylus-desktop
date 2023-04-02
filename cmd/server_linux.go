@@ -19,22 +19,11 @@
 package cmd
 
 import (
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 func serverFlagsOSSpecific(cmd *cobra.Command) {
 	cmd.Flags().BoolP("wayland-support", "", false, "Wayland/PipeWire Support.")
 	cmd.Flags().BoolP("try-vaapi", "", false, "Try to use hardware acceleration through the Video Acceleration API.")
 	cmd.Flags().BoolP("try-nvenc", "", false, "Try to use Nvidia's NVENC to encode the video via GPU.")
-	if err := viper.BindPFlag("try-nvenc", cmd.Flags().Lookup("try-nvenc")); err != nil {
-		log.Fatal().Err(err).Msg("failed binding flag try-nvenc")
-	}
-	if err := viper.BindPFlag("try-vaapi", cmd.Flags().Lookup("try-vaapi")); err != nil {
-		log.Fatal().Err(err).Msg("failed binding flag try-vaapi")
-	}
-	if err := viper.BindPFlag("wayland-support", cmd.Flags().Lookup("wayland-support")); err != nil {
-		log.Fatal().Err(err).Msg("failed binding flag wayland-support")
-	}
 }

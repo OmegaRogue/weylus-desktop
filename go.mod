@@ -13,6 +13,7 @@ require (
 	github.com/rs/zerolog v1.29.0
 	github.com/samber/lo v1.38.1
 	github.com/spf13/cobra v1.6.1
+	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
 	nhooyr.io/websocket v1.8.7
 )
@@ -35,7 +36,6 @@ require (
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	go4.org/unsafe/assume-no-moving-gc v0.0.0-20230221090011-e4bae7ad2296 // indirect
 	golang.org/x/exp v0.0.0-20230315142452-642cacee5cc0 // indirect

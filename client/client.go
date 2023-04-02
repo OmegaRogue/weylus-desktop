@@ -132,7 +132,11 @@ func (w *WeylusClient) Config(config protocol.Config) (protocol.WeylusResponse, 
 	if err != nil {
 		return protocol.WeylusResponseError, errors.Wrap(err, "error on receive")
 	}
-	return protocol.ParseWeylusResponse(resp)
+	res, err := protocol.ParseWeylusResponse(resp)
+	if err != nil {
+		return "", errors.Wrap(err, "parse response")
+	}
+	return res, nil
 }
 
 func (w *WeylusClient) StartVideo() error {

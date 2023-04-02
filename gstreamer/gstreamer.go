@@ -149,7 +149,7 @@ func elementLinkMany(elems ...GstElementer) error {
 			continue
 		}
 		if err := lastElem.Link(elem); err != nil {
-			return err
+			return errors.Wrap(err, "link many")
 		}
 		lastElem = elem
 	}
