@@ -25,7 +25,7 @@ jobs:
           packages: libunwind-dev libgstreamer1.0-dev libgtk-4-dev libsystemd-dev libgstreamer-plugins-base1.0-dev
           version: 0.0.0.3
       - run: go install github.com/abice/go-enum@latest
-      - run: go install github.com/jstemmer/go-junit-report@latest
+      - run: go install github.com/jstemmer/go-junit-report/v2@latest
       - name: Generate
         run: go generate -v ./...
       - name: Build
