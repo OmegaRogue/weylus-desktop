@@ -21,12 +21,14 @@ package server
 import (
 	"context"
 	_ "embed"
+	"encoding/json"
 	"html/template"
 	"net"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/OmegaRogue/weylus-desktop/protocol"
 	"github.com/OmegaRogue/weylus-desktop/utils"
 	"github.com/OmegaRogue/weylus-desktop/web"
 	"github.com/justinas/alice"
@@ -114,12 +116,25 @@ func newWeylusWebsocketServer(ctx context.Context, logger *zerolog.Logger, addr 
 				}
 				return
 			default:
-				var v interface{}
-				err = wsjson.Read(ctx, c, &v)
+				typ, data, err := c.Read(ctx)
 				if err != nil {
-					log.Fatal().Err(err).Msg("read")
+					hlog.FromRequest(request).Fatal().Err(err).Msg("read")
 				}
-				log.Info().Msgf("received: %v", v)
+
+				hlog.FromRequest(request).Info().Str("type", typ.String()).RawJSON("data", data).Msg("received data")
+				if typ == websocket.MessageText {
+					var v any
+					if err := json.Unmarshal(data, &v); err != nil {
+						hlog.FromRequest(request).Fatal().Err(err).Msg("unmarshal json")
+					}
+					if v.(string) == "GetCapturableList" {
+						ret := protocol.CapturableList{CapturableList: []string{"no"}}
+
+						if err := wsjson.Write(ctx, c, &ret); err != nil {
+							hlog.FromRequest(request).Fatal().Err(err).Msg("write")
+						}
+					}
+				}
 			}
 		}
 	}))
@@ -173,7 +188,7 @@ func (s *WeylusServer) RunWebsite() {
 }
 func (s *WeylusServer) RunWebsocket() {
 	if err := s.websocketServer.ListenAndServe(); err != nil {
-		log.Fatal().Err(err).Msg("websocket failed")
+		log.Info().Err(err).Msg("websocket failed")
 	}
 }
 

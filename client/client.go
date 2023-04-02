@@ -84,7 +84,7 @@ func NewWeylusClient(ctx context.Context, fps uint) *WeylusClient {
 	ctx = log.With().Str("component", "client").Logger().WithContext(ctx)
 	w.ctx, w.cancel = context.WithCancel(ctx)
 	w.Framerate = fps
-	log.Ctx(ctx).Info().Dur("frame_time", time.Second/time.Duration(w.Framerate)).Uint("fps", fps).Msg("video times")
+	log.Ctx(ctx).Debug().Dur("frame_time", time.Second/time.Duration(w.Framerate)).Uint("fps", fps).Msg("video times")
 	w.frameTimer = time.NewTicker(time.Second / time.Duration(w.Framerate))
 
 	return w
@@ -242,7 +242,7 @@ func (w *WeylusClient) Run() {
 		case msg := <-w.msgs:
 			switch msg.Type {
 			case websocket.MessageText:
-				log.Ctx(w.ctx).Info().RawJSON("data", msg.Data).Bytes("data2", msg.Data).Msg("received data")
+				log.Ctx(w.ctx).Info().RawJSON("data", msg.Data).Msg("received data")
 				for response, callbacks := range w.callbacks {
 					if strings.Contains(string(msg.Data), string(response)) {
 						for _, callback := range callbacks {

@@ -31,11 +31,18 @@ import (
 )
 
 func SetupLogger() {
-	consoleWriter := zerolog.ConsoleWriter{
-		Out:           os.Stderr,
-		FieldsExclude: []string{journald.ThreadFieldName, gliblogger.GlibLevelFieldName},
+	var multi zerolog.LevelWriter
+	journaldWriter := journald.NewBetterJournaldWriter()
+
+	if os.Getenv("WEYLUS_LOG_JSON") == "true" {
+		multi = zerolog.MultiLevelWriter(os.Stderr, journaldWriter)
+	} else {
+		consoleWriter := zerolog.ConsoleWriter{
+			Out:           os.Stderr,
+			FieldsExclude: []string{journald.ThreadFieldName, gliblogger.GlibLevelFieldName},
+		}
+		multi = zerolog.MultiLevelWriter(consoleWriter, journaldWriter)
 	}
-	multi := zerolog.MultiLevelWriter(consoleWriter, journald.NewBetterJournaldWriter())
 	log.Logger = log.Output(multi).With().Caller().Logger().Hook(journald.ThreadHook{})
 	stdLogger := log.With().Str("component", "stdlog").Logger()
 	stdlog.SetOutput(stdLogger)
@@ -43,6 +50,20 @@ func SetupLogger() {
 		glibLog := log.With().Str("component", "glib").Logger()
 		glib.LogSetWriter(gliblogger.LoggerHandler(&glibLog))
 	}
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	switch os.Getenv("WEYLUS_LOG_LEVEL") {
+	case "ERROR":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+	case "WARN":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	case "INFO":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	case "DEBUG":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	case "TRACE":
+		zerolog.SetGlobalLevel(zerolog.TraceLevel)
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 }
