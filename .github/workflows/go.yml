@@ -25,13 +25,21 @@ jobs:
           packages: libunwind-dev libgstreamer1.0-dev libgtk-4-dev libsystemd-dev libgstreamer-plugins-base1.0-dev
           version: 0.0.0.3
       - run: go install github.com/abice/go-enum@latest
+      - run: go install github.com/jstemmer/go-junit-report@latest
       - name: Generate
         run: go generate -v ./...
       - name: Build
         run: go build -v ./...
       - name: Test
-        run: go test -coverprofile=coverage.txt -covermode=atomic -v -v ./...
+        run: |
+          go test -coverprofile=coverage.txt -covermode=atomic -json -v ./... | \
+          go-junit-report -parser gojson -set-exit-code > report.xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         with:
           fail_ci_if_error: true
+      - name: Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: report.xml
+        if: always()
