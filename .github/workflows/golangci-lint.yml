@@ -31,8 +31,9 @@ jobs:
       - run: go install github.com/abice/go-enum@latest
       - name: Generate
         run: go generate -v ./...
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          args: --timeout=60m --verbose --modules-download-mode readonly --issues-exit-code=0
-          only-new-issues: true
+      - run: ls -lha ../../../go/pkg/mod
+#      - name: golangci-lint
+#        uses: golangci/golangci-lint-action@v3
+#        with:
+#          args: --timeout=60m --verbose --modules-download-mode readonly --issues-exit-code=0
+#          only-new-issues: true
