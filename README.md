@@ -5,7 +5,9 @@
 [![Go Report Card][4]][5]
 [![GitHub license][6]][7]
 ![Please theme this app][8]
-![[golangci-lint][10]][11]
+[![golangci-lint][10]][11]
+[![Go Test][12]][13]
+[![CodeQL][14]][15]
 
 Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
 
@@ -35,6 +37,14 @@ Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
 
 [9]: http://example.com
 
-[10]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/golangci-lint.yml
+[10]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/golangci-lint.yml/badge.svg
 
-[11]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/golangci-lint.yml/badge.svg
+[11]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/golangci-lint.yml
+
+[12]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/go.yml/badge.svg
+
+[13]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/go.yml
+
+[14]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/codeql-analysis.yml/badge.svg
+
+[15]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/codeql-analysis.yml
