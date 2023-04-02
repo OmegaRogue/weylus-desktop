@@ -35,5 +35,5 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          args: --timeout=60m --verbose --modules-download-mode readonly
+          args: --timeout=60m --modules-download-mode readonly
           only-new-issues: true
