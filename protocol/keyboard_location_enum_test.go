@@ -121,13 +121,16 @@ func FuzzParseKeyboardLocation(f *testing.F) {
 
 func FuzzKeyboardLocation_UnmarshalText(f *testing.F) {
 	for _, seed := range KeyboardLocationValues() {
+		f.Log(int(seed))
 		b, _ := seed.MarshalText()
 		f.Add(b)
 	}
 	f.Fuzz(func(t *testing.T, in []byte) {
 		var res KeyboardLocation
 		err := res.UnmarshalText(in)
+		t.Logf("in: %s %v out: %v", string(in), in, res)
 		if err != nil {
+			t.Log(err)
 			if res2, err2 := res.MarshalText(); err2 != nil {
 				t.Fatalf("error on remarshal %v: %v", res, err2)
 			} else if string(in) != string(res2) && string(in) != strconv.Itoa(int(res)) && res != KeyboardLocationStandard {

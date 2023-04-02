@@ -16,9 +16,8 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package main
+package gstreamer
 
-import "C"
 import (
 	"unsafe"
 

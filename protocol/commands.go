@@ -20,8 +20,7 @@
 package protocol
 
 import (
-	"reflect"
-
+	"github.com/OmegaRogue/weylus-desktop/utils"
 	"github.com/pkg/errors"
 )
 
@@ -67,11 +66,11 @@ func CommandFromOutboundContent[T MessageOutboundContent](content T) (WeylusComm
 	case Config:
 		return WeylusCommandConfig, nil
 	default:
-		if b := reflect.ValueOf(content); b.Kind() == reflect.String {
-			return WeylusCommand(b.String()), nil
-		} else {
-			return "", errors.New("Invalid Outbound Content")
+		str, err := utils.GetUnderlyingString(content)
+		if err != nil {
+			return "", errors.Wrap(err, "Invalid Outbound Content")
 		}
+		return WeylusCommand(str), nil
 	}
 }
 

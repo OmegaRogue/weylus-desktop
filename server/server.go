@@ -53,7 +53,7 @@ type WeylusServer struct {
 	websocketServer *http.Server
 }
 
-func newWeylusWebsiteServer(ctx context.Context, logger zerolog.Logger, addr string, websocketPort uint16) *http.Server {
+func newWeylusWebsiteServer(ctx context.Context, logger *zerolog.Logger, addr string, websocketPort uint16) *http.Server {
 	mux := http.NewServeMux()
 	c := middleware(logger)
 	h := c.Then(http.HandlerFunc(handleWebsite(websocketPort)))
@@ -88,7 +88,7 @@ func newWeylusWebsiteServer(ctx context.Context, logger zerolog.Logger, addr str
 		Handler: mux,
 	}
 }
-func newWeylusWebsocketServer(ctx context.Context, logger zerolog.Logger, addr string) *http.Server {
+func newWeylusWebsocketServer(ctx context.Context, logger *zerolog.Logger, addr string) *http.Server {
 	mux := http.NewServeMux()
 	c := middleware(logger)
 	h := c.Then(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -141,14 +141,14 @@ func NewWeylusServer(ctx context.Context, hostname string, websitePort, websocke
 	ctx = logger.WithContext(ctx)
 	s.websiteAddr = net.JoinHostPort(hostname, strconv.FormatUint(uint64(websitePort), 10))
 	s.websocketAddr = net.JoinHostPort(hostname, strconv.FormatUint(uint64(websocketPort), 10))
-	s.websiteServer = newWeylusWebsiteServer(ctx, logger, s.websiteAddr, websocketPort)
-	s.websocketServer = newWeylusWebsocketServer(ctx, logger, s.websocketAddr)
+	s.websiteServer = newWeylusWebsiteServer(ctx, &logger, s.websiteAddr, websocketPort)
+	s.websocketServer = newWeylusWebsocketServer(ctx, &logger, s.websocketAddr)
 	return s
 }
 
-func middleware(logger zerolog.Logger) alice.Chain {
+func middleware(logger *zerolog.Logger) alice.Chain {
 	c := alice.New()
-	c = c.Append(hlog.NewHandler(logger))
+	c = c.Append(hlog.NewHandler(*logger))
 	c = c.Append(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
 		hlog.FromRequest(r).Info().
 			Str("method", r.Method).

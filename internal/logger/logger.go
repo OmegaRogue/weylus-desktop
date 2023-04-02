@@ -41,7 +41,7 @@ func SetupLogger() {
 	stdlog.SetOutput(stdLogger)
 	if os.Getenv("G_DEBUG") != "" {
 		glibLog := log.With().Str("component", "glib").Logger()
-		glib.LogSetWriter(gliblogger.LoggerHandler(glibLog))
+		glib.LogSetWriter(gliblogger.LoggerHandler(&glibLog))
 	}
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack

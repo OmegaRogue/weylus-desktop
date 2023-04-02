@@ -22,9 +22,9 @@ package protocol
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strings"
 
+	"github.com/OmegaRogue/weylus-desktop/utils"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )
@@ -45,7 +45,7 @@ type MessageOutbound interface {
 	map[WeylusCommand]PointerEvent | map[WeylusCommand]WheelEvent | map[WeylusCommand]KeyboardEvent | map[WeylusCommand]Config | ~string
 }
 
-func WrapMessage[T MessageOutboundContent | ~string](a T) any {
+func WrapMessage[T MessageOutboundContent](a T) any {
 	wrapper := make(map[WeylusCommand]T)
 	switch any(a).(type) {
 	case PointerEvent:
@@ -59,7 +59,11 @@ func WrapMessage[T MessageOutboundContent | ~string](a T) any {
 	case string, WeylusCommand:
 		return a
 	default:
-		log.Fatal().Interface("result", a).Str("type", reflect.TypeOf(a).String()).Msg("invalid type")
+		str, err := utils.GetUnderlyingString(a)
+		if err != nil {
+			log.Panic().Err(err).Msg("what the fuck did you do? this should never happen, immediately report this as an issue")
+		}
+		return str
 	}
 	return wrapper
 }

@@ -209,7 +209,7 @@ func (m *ControllerManager) StylusProximityEventHandler(x, y float64) {
 
 func (m *ControllerManager) StylusMotionEventHandler(x, y float64) {
 	m.stylusEventHandler(x, y)
-	defer m.runCallbacks()
+	m.runCallbacks()
 }
 
 func (m *ControllerManager) PressedHandler(_ int, x, y float64) {

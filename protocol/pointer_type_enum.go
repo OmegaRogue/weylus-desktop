@@ -27,8 +27,6 @@ package protocol
 import (
 	"fmt"
 	"strings"
-
-	"github.com/rs/zerolog"
 )
 
 const (
@@ -107,8 +105,4 @@ func (x *PointerType) UnmarshalText(text []byte) error {
 	}
 	*x = tmp
 	return nil
-}
-
-func (x PointerType) MarshalZerologObject(e *zerolog.Event) {
-	e.Str("PointerType", fmt.Sprint(x))
 }

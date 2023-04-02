@@ -105,13 +105,26 @@ func TestWeylusCommand_MarshalText(t *testing.T) {
 	}
 }
 
-func TestWeylusCommand_UnmarshalText(t *testing.T) {
+func TestWeylusCommand_UnmarshalText_Correct(t *testing.T) {
 	var foo WeylusCommand
 	for s, command := range _WeylusCommandValue {
 		if err := foo.UnmarshalText([]byte(s)); err != nil {
-			t.Fatalf("Unmarshal %s returned error %v", s, err)
+			if err.Error() != fmt.Errorf("%s is %w", s, ErrInvalidWeylusResponse).Error() {
+				t.Fatalf("invalid error on unmarshal %s: %v", s, err)
+			}
 		} else if foo != command {
 			t.Fatalf("Unmarshal %s returned invalid value %s", s, foo)
+		}
+	}
+}
+
+func TestWeylusCommand_UnmarshalText_Invalid(t *testing.T) {
+	var foo WeylusCommand
+	for _, s := range []string{"0"} {
+		if err := foo.UnmarshalText([]byte(s)); err != nil {
+			if err.Error() != fmt.Errorf("%s is %w", s, ErrInvalidWeylusCommand).Error() {
+				t.Fatalf("invalid error on unmarshal %s: %v", s, err)
+			}
 		}
 	}
 }
@@ -184,13 +197,26 @@ func TestWeylusResponse_MarshalText(t *testing.T) {
 	}
 }
 
-func TestWeylusResponse_UnmarshalText(t *testing.T) {
+func TestWeylusResponse_UnmarshalText_Correct(t *testing.T) {
 	var foo WeylusResponse
 	for s, command := range _WeylusResponseValue {
 		if err := foo.UnmarshalText([]byte(s)); err != nil {
-			t.Fatalf("Unmarshal %s returned error %v", s, err)
+			if err.Error() != fmt.Errorf("%s is %w", s, ErrInvalidWeylusResponse).Error() {
+				t.Fatalf("invalid error on unmarshal %s: %v", s, err)
+			}
 		} else if foo != command {
 			t.Fatalf("Unmarshal %s returned invalid value %s", s, foo)
+		}
+	}
+}
+
+func TestWeylusResponse_UnmarshalText_Invalid(t *testing.T) {
+	var foo WeylusResponse
+	for _, s := range []string{"0"} {
+		if err := foo.UnmarshalText([]byte(s)); err != nil {
+			if err.Error() != fmt.Errorf("%s is %w", s, ErrInvalidWeylusResponse).Error() {
+				t.Fatalf("invalid error on unmarshal %s: %v", s, err)
+			}
 		}
 	}
 }
@@ -203,6 +229,7 @@ func FuzzWeylusResponse_UnmarshalText(f *testing.F) {
 	f.Fuzz(func(t *testing.T, in []byte) {
 		var res WeylusResponse
 		err := res.UnmarshalText(in)
+		t.Logf("in: %s %v out: %v", string(in), in, res)
 		if err != nil {
 			if err.Error() != fmt.Errorf("%s is %w", string(in), ErrInvalidWeylusResponse).Error() {
 				t.Fatalf("invalid error on unmarshal %s: %v", string(in), err)

@@ -77,13 +77,26 @@ func TestPointerEventType_MarshalText(t *testing.T) {
 	}
 }
 
-func TestPointerEventType_UnmarshalText(t *testing.T) {
+func TestPointerEventType_UnmarshalText_Correct(t *testing.T) {
 	var foo PointerEventType
 	for s, command := range _PointerEventTypeValue {
 		if err := foo.UnmarshalText([]byte(s)); err != nil {
-			t.Fatalf("Unmarshal %s returned error %v", s, err)
+			if err.Error() != fmt.Errorf("%s is %w", s, ErrInvalidPointerEventType).Error() {
+				t.Fatalf("invalid error on unmarshal %s: %v", s, err)
+			}
 		} else if foo != command {
 			t.Fatalf("Unmarshal %s returned invalid value %s", s, foo)
+		}
+	}
+}
+
+func TestPointerEventType_UnmarshalText_Invalid(t *testing.T) {
+	var foo PointerEventType
+	for _, s := range []string{"0"} {
+		if err := foo.UnmarshalText([]byte(s)); err != nil {
+			if err.Error() != fmt.Errorf("%s is %w", s, ErrInvalidPointerEventType).Error() {
+				t.Fatalf("invalid error on unmarshal %s: %v", s, err)
+			}
 		}
 	}
 }

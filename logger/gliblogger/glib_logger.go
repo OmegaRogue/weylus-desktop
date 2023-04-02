@@ -55,8 +55,8 @@ func logLevelGlibZerolog(lvl glib.LogLevelFlags) zerolog.Level {
 // more information, see LogUseLogger's documentation.
 //
 //goland:noinspection SpellCheckingInspection
-//nolint:funlen,gocognit
-func LoggerHandler(l zerolog.Logger) glib.LogWriterFunc {
+//nolint:funlen,gocognit // I don't see a way to simplify this
+func LoggerHandler(l *zerolog.Logger) glib.LogWriterFunc {
 	// Treat Lshortfile and Llongfile the same, because we don't have
 	// the full path in codeFile anyway.
 	Lfile := stdlog.Flags()&(stdlog.Lshortfile|stdlog.Llongfile) != 0

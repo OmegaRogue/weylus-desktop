@@ -17,7 +17,7 @@
  */
 
 //go:generate go-enum --names --values
-package main
+package gstreamer
 
 // GstState represents the possible states an element can be in.
 // ENUM(VoidPending,Null,Ready,Paused,Playing)

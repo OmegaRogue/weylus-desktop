@@ -8,6 +8,7 @@
 [![golangci-lint][10]][11]
 [![Go Test][12]][13]
 [![CodeQL][14]][15]
+[![codecov][16]][17]
 
 Desktop client for [Weylus](https://github.com/H-M-H/Weylus).
 
@@ -50,3 +51,7 @@ Basic usage and docs are located [here](https://github.com/OmegaRogue/weylus-des
 [14]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/codeql-analysis.yml/badge.svg
 
 [15]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/codeql-analysis.yml
+
+[16]: https://codecov.io/gh/OmegaRogue/weylus-desktop/branch/main/graph/badge.svg?token=Mi7rER95hX
+
+[17]: https://codecov.io/gh/OmegaRogue/weylus-desktop

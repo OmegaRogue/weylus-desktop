@@ -77,13 +77,26 @@ func TestPointerType_MarshalText(t *testing.T) {
 	}
 }
 
-func TestPointerType_UnmarshalText(t *testing.T) {
+func TestPointerType_UnmarshalText_Correct(t *testing.T) {
 	var foo PointerType
 	for s, command := range _PointerTypeValue {
 		if err := foo.UnmarshalText([]byte(s)); err != nil {
-			t.Fatalf("Unmarshal %s returned error %v", s, err)
+			if err.Error() != fmt.Errorf("%s is %w", s, ErrInvalidPointerType).Error() {
+				t.Fatalf("invalid error on unmarshal %s: %v", s, err)
+			}
 		} else if foo != command {
 			t.Fatalf("Unmarshal %s returned invalid value %s", s, foo)
+		}
+	}
+}
+
+func TestPointerType_UnmarshalText_Invalid(t *testing.T) {
+	var foo PointerType
+	for _, s := range []string{"0"} {
+		if err := foo.UnmarshalText([]byte(s)); err != nil {
+			if err.Error() != fmt.Errorf("%s is %w", s, ErrInvalidPointerType).Error() {
+				t.Fatalf("invalid error on unmarshal %s: %v", s, err)
+			}
 		}
 	}
 }

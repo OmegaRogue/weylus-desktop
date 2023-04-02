@@ -16,7 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package main
+package gstreamer
 
 // #cgo pkg-config: gstreamer-1.0 glib-2.0 gstreamer-app-1.0 gstreamer-video-1.0 gtk4
 // #include "go_gstreamer.h"

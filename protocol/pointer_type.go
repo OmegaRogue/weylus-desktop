@@ -18,7 +18,7 @@
 
 // Package protocol
 //
-//go:generate go-enum --marshal --names --values -t ../assets/zerolog.gotmpl
+//go:generate go-enum --marshal --names --values
 package protocol
 
 // PointerType indicates what type the pointer triggering this event is.

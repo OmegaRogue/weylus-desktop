@@ -196,9 +196,15 @@ func activate(app *gtk.Application) {
 		err := sh(ctx, fmt.Sprintf(`
 			ffmpeg -y \
 				-hide_banner -loglevel error \
-				-hwaccel cuda -c:v h264_cuvid -f mp4 -re -i - \
+				-f mp4 -re -i - \
 				-c:v bmp -pix_fmt rgba -update 1 -atomic_writing 1 %s/screen.bmp
 		`, tmpdir), weylusClient.BufPipe)
+		// err := sh(ctx, fmt.Sprintf(`
+		// 	ffmpeg -y \
+		// 		-hide_banner -loglevel error \
+		// 		-hwaccel cuda -c:v h264_cuvid -f mp4 -re -i - \
+		// 		-c:v bmp -pix_fmt rgba -update 1 -atomic_writing 1 %s/screen.bmp
+		// `, tmpdir), weylusClient.BufPipe, weylusClient)
 		// err := sh(ctx, fmt.Sprintf(`
 		// 	ffmpeg -y \
 		// 		-hide_banner -loglevel error \
@@ -282,7 +288,7 @@ func activate(app *gtk.Application) {
 		UInputSupport: true,
 		CapturableID:  0,
 		CaptureCursor: true,
-		MaxWidth:      5120 / 2,
+		MaxWidth:      5120,
 		MaxHeight:     1440,
 		ClientName:    "weylus-desktop",
 	}); err != nil {

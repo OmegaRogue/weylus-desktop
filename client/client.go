@@ -164,6 +164,8 @@ func (w *WeylusClient) TryGetFrame() error {
 	}
 	return nil
 }
+
+//nolint:gocritic // PointerEvent might be heavy, but it should be like this
 func (w *WeylusClient) SendPointerEvent(e protocol.PointerEvent) error {
 	if w.ws == nil {
 		return errors.Wrap(WebsocketNotStartedError, "SendPointerEvent failed")

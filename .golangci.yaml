@@ -74,6 +74,10 @@ linters-settings:
        * along with this program. If not, see <https://www.gnu.org/licenses/>.
   gocritic:
     enabled-tags:
+      - diagnostic
+      - experimental
+      - style
+      - performance
       - opinionated
   govet:
     settings:
@@ -122,3 +126,10 @@ issues:
     - linters:
         - typecheck
       text: "pattern static/lib.js: no matching files found"
+    - path: 'gstreamer/(.+)\.go'
+      linters:
+        - gocritic
+      text: "dupImport"
+    - linters:
+        - gocritic
+      text: "commentedOutCode"
