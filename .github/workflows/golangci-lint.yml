@@ -31,9 +31,10 @@ jobs:
       - run: go install github.com/abice/go-enum@latest
       - name: Generate
         run: go generate -v ./...
-      - run: echo $USER; groups; ls -lha ../../../go/pkg/mod/nhooyr.io/websocket@v1.8.7/dial.go
-#      - name: golangci-lint
-#        uses: golangci/golangci-lint-action@v3
-#        with:
-#          args: --timeout=60m --verbose --modules-download-mode readonly --issues-exit-code=0
-#          only-new-issues: true
+      - run: ls -lha ../../../go/pkg/mod/nhooyr.io/websocket@v1.8.7/dial.go
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          args: --timeout=60m --verbose --modules-download-mode readonly --issues-exit-code=0
+          only-new-issues: true
+      - run: ls -lha ../../../go/pkg/mod/nhooyr.io/websocket@v1.8.7/dial.go
