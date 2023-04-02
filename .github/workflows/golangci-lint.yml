@@ -31,7 +31,7 @@ jobs:
       - run: go install github.com/abice/go-enum@latest
       - name: Generate
         run: go generate -v ./...
-      - run: echo $USER; groups; ls -lha ../../../go/pkg/mod
+      - run: echo $USER; groups; ls -lha ../../../go/pkg/mod/nhooyr.io/websocket@v1.8.7/dial.go
 #      - name: golangci-lint
 #        uses: golangci/golangci-lint-action@v3
 #        with:
