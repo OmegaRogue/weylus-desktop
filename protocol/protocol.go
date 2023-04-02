@@ -61,7 +61,7 @@ func WrapMessage[T MessageOutboundContent](a T) any {
 	default:
 		str, err := utils.GetUnderlyingString(a)
 		if err != nil {
-			log.Panic().Err(err).Msg("what the fuck did you do? this should never happen, immediately report this as an issue")
+			log.Panic().Err(err).Msg("what the fuck did you do? (I'm genuinely curious) This should never happen, immediately report this as an issue")
 		}
 		return str
 	}
