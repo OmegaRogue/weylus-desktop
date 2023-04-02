@@ -9,7 +9,9 @@
 [![Go Test][12]][13]
 [![CodeQL][14]][15]
 
-Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
+Desktop client for [Weylus](https://github.com/H-M-H/Weylus).
+
+Basic usage and docs are located [here](https://github.com/OmegaRogue/weylus-desktop/wiki/weylus-desktop)
 
 ## Attribution
 
