@@ -39,6 +39,8 @@ func NewBufPipe() *bufio.ReadWriter {
 	return bufio.NewReadWriter(bufio.NewReader(pr), bufio.NewWriter(pw))
 }
 
+type UnderlyingString string
+
 type Msg struct {
 	Type websocket.MessageType
 	Data []byte

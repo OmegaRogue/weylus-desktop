@@ -96,10 +96,7 @@ func commandWithReceive[T protocol.MessageInbound, V protocol.MessageOutboundCon
 	}
 	var wg sync.WaitGroup
 	wg.Add(1)
-	resp, err := protocol.ResponseFromOutboundContent(command)
-	if err != nil {
-		return a, errors.Wrap(err, "error on ResponseFromOutboundContent")
-	}
+	resp := protocol.ResponseFromOutboundContent(command)
 	w.AddCallbackNext(resp, func(msg utils.Msg) {
 		var r any
 		r, err = protocol.ParseMessage(msg.Data)
@@ -111,10 +108,7 @@ func commandWithReceive[T protocol.MessageInbound, V protocol.MessageOutboundCon
 		wg.Done()
 	})
 	if err := wsjson.Write(w.ctx, w.ws, protocol.WrapMessage(command)); err != nil {
-		cmd, err := protocol.CommandFromOutboundContent(command)
-		if err != nil {
-			return a, errors.Wrap(err, "error on CommandFromOutboundContent")
-		}
+		cmd := protocol.CommandFromOutboundContent(command)
 		return a, errors.Wrap(err, cmd.String())
 	}
 	wg.Wait()
@@ -248,7 +242,7 @@ func (w *WeylusClient) Run() {
 		case msg := <-w.msgs:
 			switch msg.Type {
 			case websocket.MessageText:
-				log.Ctx(w.ctx).Info().RawJSON("data", msg.Data).Msg("received data")
+				log.Ctx(w.ctx).Info().RawJSON("data", msg.Data).Bytes("data2", msg.Data).Msg("received data")
 				for response, callbacks := range w.callbacks {
 					if strings.Contains(string(msg.Data), string(response)) {
 						for _, callback := range callbacks {

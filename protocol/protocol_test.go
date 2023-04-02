@@ -20,61 +20,107 @@ package protocol
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
-	"github.com/pkg/errors"
+	"github.com/OmegaRogue/weylus-desktop/utils"
 )
 
 func TestWrapMessage(t *testing.T) {
-
-	//case PointerEvent:
-	//	wrapper[WeylusCommandPointerEvent] = a
-	//	case WheelEvent:
-	//	wrapper[WeylusCommandWheelEvent] = a
-	//	case KeyboardEvent:
-	//	wrapper[WeylusCommandKeyboardEvent] = a
-	//	case Config:
-	//	wrapper[WeylusCommandConfig] = a
-	//	case string, WeylusCommand:
 	t.Run("PointerEvent", func(t *testing.T) {
 		out := WrapMessage(PointerEvent{})
-		t.Log(out)
+		if res, ok := out.(map[WeylusCommand]PointerEvent); !ok {
+			t.Errorf("invalid result: %v", out)
+		} else if _, ok := res[WeylusCommandPointerEvent]; !ok {
+			t.Errorf("invalid key in map: %v", res)
+		}
 	})
 
 	t.Run("WheelEvent", func(t *testing.T) {
 		out := WrapMessage(WheelEvent{})
-		t.Log(out)
+		if res, ok := out.(map[WeylusCommand]WheelEvent); !ok {
+			t.Errorf("invalid result: %v", out)
+		} else if _, ok := res[WeylusCommandWheelEvent]; !ok {
+			t.Errorf("invalid key in map: %v", res)
+		}
 	})
 	t.Run("KeyboardEvent", func(t *testing.T) {
 		out := WrapMessage(KeyboardEvent{})
-		t.Log(out)
+		if res, ok := out.(map[WeylusCommand]KeyboardEvent); !ok {
+			t.Errorf("invalid result: %v", out)
+		} else if _, ok := res[WeylusCommandKeyboardEvent]; !ok {
+			t.Errorf("invalid key in map: %v", res)
+		}
 	})
 	t.Run("Config", func(t *testing.T) {
 		out := WrapMessage(Config{})
-		t.Log(out)
+		if res, ok := out.(map[WeylusCommand]Config); !ok {
+			t.Errorf("invalid result: %v", out)
+		} else if _, ok := res[WeylusCommandConfig]; !ok {
+			t.Errorf("invalid key in map: %v", res)
+		}
 	})
 	t.Run("WeylusCommand", func(t *testing.T) {
 		out := WrapMessage(WeylusCommandTryGetFrame)
-		t.Log(out)
+		if res, ok := out.(WeylusCommand); !ok {
+			t.Errorf("invalid result: %v", out)
+		} else if res != "TryGetFrame" {
+			t.Errorf("invalid value: %v", res)
+		}
 	})
 	t.Run("string", func(t *testing.T) {
-		out := WrapMessage("")
-		t.Log(out)
+		out := WrapMessage("test")
+		if res, ok := out.(string); !ok {
+			t.Errorf("invalid result: %v", out)
+		} else if res != "test" {
+			t.Errorf("invalid value: %v", res)
+		}
 	})
-	t.Run("underlyingString", func(t *testing.T) {
-		out := WrapMessage(underlyingString("test"))
-		t.Log(out)
+	t.Run("UnderlyingString", func(t *testing.T) {
+		out := WrapMessage(utils.UnderlyingString("test"))
+		if res, ok := out.(string); !ok {
+			t.Errorf("invalid result: %v", out)
+		} else if res != "test" {
+			t.Errorf("invalid value: %v", res)
+		}
 	})
 }
 
 func TestParseMessage(t *testing.T) {
+	t.Run("CapturableList", func(t *testing.T) {
+		_, err := ParseMessage([]byte("{\"CapturableList\":[\"Desktop\",\"Monitor: DP-4\",\"Weylus - 0.11.4\",\"Desktop (autopilot)\"]}"))
+		if err != nil {
+			t.Error(err)
+		}
+	})
+	t.Run("ConfigError", func(t *testing.T) {
+		_, err := ParseMessage([]byte("{\"ConfigError\":\"test\"}"))
+		if err != nil {
+			t.Error(err)
+		}
+	})
+	t.Run("Error", func(t *testing.T) {
+		_, err := ParseMessage([]byte("{\"Error\":\"test\"}"))
+		if err != nil {
+			t.Error(err)
+		}
+	})
+	t.Run("V", func(t *testing.T) {
+		_, err := ParseMessage([]byte("{\"Error\":\"test\"}"))
+		if err != nil {
+			t.Error(err)
+		}
+	})
+
 }
 
 func FuzzParseMessage(f *testing.F) {
 	f.Fuzz(func(t *testing.T, in []byte) {
 		out, err := ParseMessage(in)
 		if err != nil {
-			t.Error(errors.Cause(err))
+			if !strings.HasPrefix(err.Error(), "failed unmarshaling data") {
+				t.Errorf("invalid error: %v", err)
+			}
 		}
 		t.Log(out)
 	})

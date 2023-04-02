@@ -25,47 +25,46 @@ import (
 )
 
 //nolint:funlen,gocognit
-func TestCommandFromOutboundContent(t *testing.T) {
+func TestResponseFromOutboundContent(t *testing.T) {
 	var tests = []struct {
 		name  string
 		input any
-		want  WeylusCommand
+		want  WeylusResponse
 	}{
-		{"TryGetFrame", WeylusCommandTryGetFrame, WeylusCommandTryGetFrame},
-		{"TryGetFrame", WeylusCommandTryGetFrame.String(), WeylusCommandTryGetFrame},
-		{"GetCapturableList", WeylusCommandGetCapturableList, WeylusCommandGetCapturableList},
-		{"GetCapturableList", WeylusCommandGetCapturableList.String(), WeylusCommandGetCapturableList},
-		{"Config", Config{}, WeylusCommandConfig},
-		{"KeyboardEvent", KeyboardEvent{}, WeylusCommandKeyboardEvent},
-		{"PointerEvent", PointerEvent{}, WeylusCommandPointerEvent},
-		{"WheelEvent", WheelEvent{}, WeylusCommandWheelEvent},
+		{"CapturableList", WeylusCommandGetCapturableList, WeylusResponseCapturableList},
+		{"CapturableList", WeylusCommandGetCapturableList.String(), WeylusResponseCapturableList},
+		{"ConfigOk", Config{}, WeylusResponseConfigOk},
+		{"Error", "", WeylusResponseError},
+		{"KeyboardEvent", KeyboardEvent{}, ""},
+		{"PointerEvent", PointerEvent{}, ""},
+		{"WheelEvent", WheelEvent{}, ""},
 	}
 	//nolint:dupl
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var res WeylusCommand
+			var res WeylusResponse
 			switch val := tt.input.(type) {
 			case PointerEvent:
-				res1 := CommandFromOutboundContent(val)
+				res1 := ResponseFromOutboundContent(val)
 				res = res1
 			case WheelEvent:
-				res1 := CommandFromOutboundContent(val)
+				res1 := ResponseFromOutboundContent(val)
 				res = res1
 			case KeyboardEvent:
-				res1 := CommandFromOutboundContent(val)
+				res1 := ResponseFromOutboundContent(val)
 				res = res1
 			case Config:
-				res1 := CommandFromOutboundContent(val)
+				res1 := ResponseFromOutboundContent(val)
 				res = res1
 			case string:
-				res1 := CommandFromOutboundContent(val)
+				res1 := ResponseFromOutboundContent(val)
 				res = res1
 			default:
 				v, err := utils.GetUnderlyingString(tt.input)
 				if err != nil {
 					t.Error(err)
 				}
-				res1 := CommandFromOutboundContent(utils.UnderlyingString(v))
+				res1 := ResponseFromOutboundContent(utils.UnderlyingString(v))
 				res = res1
 			}
 			if res != tt.want {

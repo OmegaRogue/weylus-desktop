@@ -4,7 +4,7 @@
 typescript:
 	tsc
 generate:
-	go generate
+	go generate ./...
 build: generate
 	go build github.com/OmegaRogue/weylus-desktop
 run-client:

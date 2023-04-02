@@ -19,39 +19,25 @@
 //go:generate go-enum --marshal --names --values
 package protocol
 
-import (
-	"github.com/OmegaRogue/weylus-desktop/utils"
-	"github.com/rs/zerolog/log"
-)
-
-// WeylusCommand contains the possible commands supported by weylus
+// WeylusResponse contains the possible commands supported by weylus
 /*
 ENUM(
-TryGetFrame
-GetCapturableList
-Config
-KeyboardEvent
-PointerEvent
-WheelEvent
+NewVideo
+CapturableList
+ConfigOk
+ConfigError
+Error
 )
 */
-type WeylusCommand string
+type WeylusResponse string
 
-func CommandFromOutboundContent[T MessageOutboundContent](content T) WeylusCommand {
-	switch any(content).(type) {
-	case PointerEvent:
-		return WeylusCommandPointerEvent
-	case WheelEvent:
-		return WeylusCommandWheelEvent
-	case KeyboardEvent:
-		return WeylusCommandKeyboardEvent
-	case Config:
-		return WeylusCommandConfig
-	default:
-		str, err := utils.GetUnderlyingString(content)
-		if err != nil {
-			log.Panic().Err(err).Msg("what the fuck did you do? this should never happen, immediately report this as an issue")
-		}
-		return WeylusCommand(str)
-	}
+var commandResponse = map[WeylusCommand]WeylusResponse{
+	WeylusCommandGetCapturableList: WeylusResponseCapturableList,
+	WeylusCommandConfig:            WeylusResponseConfigOk,
+	"":                             WeylusResponseError,
+}
+
+func ResponseFromOutboundContent[T MessageOutboundContent](content T) WeylusResponse {
+	cmd := CommandFromOutboundContent(content)
+	return commandResponse[cmd]
 }
