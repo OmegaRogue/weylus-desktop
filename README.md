@@ -5,7 +5,6 @@
 [![Go Report Card][4]][5]
 [![GitHub license][6]][7]
 ![Please theme this app][8]
-![GitHub][10]
 
 Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
 
