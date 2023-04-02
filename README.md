@@ -5,6 +5,7 @@
 [![Go Report Card][4]][5]
 [![GitHub license][6]][7]
 ![Please theme this app][8]
+![[golangci-lint][10]][11]
 
 Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
 
@@ -34,4 +35,6 @@ Desktop client for [Weylus](https://github.com/H-M-H/Weylus)
 
 [9]: http://example.com
 
-[10]: https://img.shields.io/github/license/OmegaRogue/weylus-desktop
+[10]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/golangci-lint.yml
+
+[11]: https://github.com/OmegaRogue/weylus-desktop/actions/workflows/golangci-lint.yml/badge.svg
