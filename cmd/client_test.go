@@ -19,12 +19,16 @@
 package cmd
 
 import (
+	"os"
 	"testing"
 
 	"github.com/OmegaRogue/weylus-desktop/internal/logger"
 )
 
 func TestActivate(t *testing.T) {
+	if os.Getenv("plsrunthis") != "" {
+		t.Skip("Not an actual test")
+	}
 	logger.SetupLogger()
 	cmd := GetRootCmd()
 	cmd.SetArgs([]string{"client"})
