@@ -10,7 +10,7 @@ require (
 	github.com/justinas/alice v1.2.0
 	github.com/kr/pretty v0.3.1
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.29.0
+	github.com/rs/zerolog v1.29.1
 	github.com/samber/lo v1.38.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
